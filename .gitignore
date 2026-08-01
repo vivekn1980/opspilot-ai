@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Env files — never commit real secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Build output
+dist/
+.next/
+out/
+
+# Prisma local dev database
+apps/api/prisma/dev.db
+apps/api/prisma/dev.db-journal
+
+# TypeScript / Next.js generated
+*.tsbuildinfo
+next-env.d.ts
+
+# Misc
+*.log
+.DS_Store
