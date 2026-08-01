@@ -1,4 +1,4 @@
-import { ChatResult, Change, Doc, Incident, Problem, ShiftHandover, Sop } from "./types";
+import { ChatResult, Change, CustomerUpdate, Doc, Incident, Problem, ShiftHandover, Sop } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -34,6 +34,10 @@ export const api = {
     }),
   generateRca: (id: string) =>
     request<Incident>(`/incidents/${id}/generate-rca`, { method: "POST" }),
+  listCustomerUpdates: (incidentId: string) =>
+    request<CustomerUpdate[]>(`/incidents/${incidentId}/customer-updates`),
+  generateCustomerUpdate: (incidentId: string) =>
+    request<CustomerUpdate>(`/incidents/${incidentId}/customer-updates/generate`, { method: "POST" }),
 
   // Problems
   listProblems: () => request<Problem[]>("/problems"),

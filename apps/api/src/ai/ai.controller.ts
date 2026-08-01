@@ -1,7 +1,8 @@
-import { Body, Controller, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { IsOptional, IsString } from "class-validator";
 import { AiService } from "./ai.service";
 import { IncidentsService } from "../incidents/incidents.service";
+import { PrismaService } from "../prisma/prisma.service";
 
 class AnalyzeLogsDto {
   @IsString()
@@ -14,6 +15,7 @@ export class AiController {
   constructor(
     private readonly aiService: AiService,
     private readonly incidentsService: IncidentsService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post("analyze-logs")
@@ -36,5 +38,30 @@ export class AiController {
       logAnalysis: incident.logAnalysis,
     });
     return this.incidentsService.update(id, { rcaReport });
+  }
+
+  @Get("customer-updates")
+  listCustomerUpdates(@Param("id") id: string) {
+    return this.prisma.customerUpdate.findMany({
+      where: { incidentId: id },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  @Post("customer-updates/generate")
+  async generateCustomerUpdate(@Param("id") id: string) {
+    const incident = await this.incidentsService.findOne(id);
+    const priorUpdates = await this.prisma.customerUpdate.findMany({
+      where: { incidentId: id },
+      orderBy: { createdAt: "asc" },
+    });
+    const content = await this.aiService.generateCustomerUpdate({
+      title: incident.title,
+      description: incident.description,
+      severity: incident.severity,
+      status: incident.status,
+      priorUpdates: priorUpdates.map((u) => u.content),
+    });
+    return this.prisma.customerUpdate.create({ data: { incidentId: id, content } });
   }
 }

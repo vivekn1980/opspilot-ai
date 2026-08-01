@@ -69,3 +69,10 @@ export interface ShiftHandover {
   periodEnd: string;
   createdAt: string;
 }
+
+export interface CustomerUpdate {
+  id: string;
+  incidentId: string;
+  content: string;
+  createdAt: string;
+}

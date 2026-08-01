@@ -153,4 +153,41 @@ export class AiService {
     });
     return this.extractText(response.content);
   }
+
+  async generateCustomerUpdate(input: {
+    title: string;
+    description: string;
+    severity: string;
+    status: string;
+    priorUpdates: string[];
+  }): Promise<string> {
+    const history = input.priorUpdates.length
+      ? `Previous updates sent to the customer, oldest first:\n${input.priorUpdates.map((u, i) => `${i + 1}. ${u}`).join("\n")}`
+      : "No previous updates have been sent for this incident.";
+
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 1024,
+      output_config: { effort: "medium" },
+      system:
+        "You are the Customer Update Generator inside OpsPilot AI. Draft a short, plain-language status " +
+        "update for affected customers about an ongoing or resolved incident. No internal jargon, ticket " +
+        "IDs, hostnames, or engineering detail — describe customer-visible impact and what's being done " +
+        "in terms a non-technical reader understands. Match tone to severity: reassuring but honest for " +
+        "high severity, brief for low severity. If this is a follow-up, don't repeat what was already " +
+        "said — report what's changed. 3-5 sentences, no markdown headers.",
+      messages: [
+        {
+          role: "user",
+          content:
+            `Incident: ${input.title}\n` +
+            `Internal description: ${input.description}\n` +
+            `Severity: ${input.severity}\n` +
+            `Current status: ${input.status}\n\n` +
+            history,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
 }

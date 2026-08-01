@@ -72,3 +72,13 @@ model ShiftHandover {
   periodEnd   DateTime
   createdAt   DateTime @default(now())
 }
+
+// AI-drafted, customer-facing status update. An incident can have several
+// over its lifecycle (opened, investigating, resolved), so this is a log,
+// not a single field on Incident.
+model CustomerUpdate {
+  id         String   @id @default(cuid())
+  incidentId String
+  content    String
+  createdAt  DateTime @default(now())
+}
