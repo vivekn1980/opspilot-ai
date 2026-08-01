@@ -221,6 +221,7 @@ select {
 }
 
 textarea {
+  width: 100%;
   font-family: var(--font-mono);
   font-size: 0.82rem;
   resize: vertical;
