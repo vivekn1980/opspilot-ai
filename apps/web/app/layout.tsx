@@ -14,7 +14,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="shell">
           <div className="topbar">
             <a href="/" className="brand">
-              <span>Ops</span>Pilot
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="OpsPilot AI" className="brand-logo" />
             </a>
             <NavLinks />
           </div>
