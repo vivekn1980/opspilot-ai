@@ -142,3 +142,11 @@ model ServiceReviewReport {
   periodEnd   DateTime
   createdAt   DateTime @default(now())
 }
+
+// Generic key-value app settings — currently just which LLM provider
+// AiService routes through. Single row per key, no per-user scoping
+// (the app has no auth/multi-tenancy yet).
+model AppSetting {
+  key   String @id
+  value String
+}

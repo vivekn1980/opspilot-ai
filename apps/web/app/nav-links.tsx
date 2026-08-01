@@ -17,6 +17,7 @@ const LINKS = [
   { href: "/runbooks", label: "Runbooks" },
   { href: "/executive-reports", label: "Exec Reports" },
   { href: "/service-review-reports", label: "Service Review" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function NavLinks() {

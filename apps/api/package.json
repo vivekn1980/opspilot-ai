@@ -15,8 +15,9 @@
     "@nestjs/platform-express": "^10.4.0",
     "@prisma/client": "^5.22.0",
     "class-transformer": "^0.5.1",
-    "dotenv": "^16.4.5",
     "class-validator": "^0.14.1",
+    "dotenv": "^16.4.5",
+    "openai": "^7.3.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

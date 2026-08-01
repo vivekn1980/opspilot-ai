@@ -1,3 +1,9 @@
+export type AiProvider = "KIMI" | "ANTHROPIC";
+
+export interface AppSettings {
+  aiProvider: AiProvider;
+}
+
 export type Severity = "SEV1" | "SEV2" | "SEV3" | "SEV4";
 export type IncidentStatus = "OPEN" | "INVESTIGATING" | "RESOLVED" | "CLOSED";
 

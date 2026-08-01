@@ -1,4 +1,6 @@
 import {
+  AiProvider,
+  AppSettings,
   CapacityReport,
   ChatResult,
   Change,
@@ -155,4 +157,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ accountName, periodStart, periodEnd }),
     }),
+
+  // Settings
+  getSettings: () => request<AppSettings>("/settings"),
+  updateSettings: (aiProvider: AiProvider) =>
+    request<AppSettings>("/settings", { method: "PUT", body: JSON.stringify({ aiProvider }) }),
 };

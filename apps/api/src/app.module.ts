@@ -13,12 +13,14 @@ import { CapacityModule } from "./capacity/capacity.module";
 import { RunbooksModule } from "./runbooks/runbooks.module";
 import { ExecutiveReportsModule } from "./executive-reports/executive-reports.module";
 import { ServiceReviewReportsModule } from "./service-review-reports/service-review-reports.module";
+import { SettingsModule } from "./settings/settings.module";
 
 @Module({
   imports: [
     PrismaModule,
     IncidentsModule,
     AiModule,
+    SettingsModule,
     ProblemsModule,
     ChangesModule,
     SopsModule,
