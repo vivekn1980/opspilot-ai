@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { CustomerUpdate, Incident, IncidentStatus } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function IncidentDetailPage() {
   const params = useParams<{ id: string }>();
@@ -130,7 +131,7 @@ export default function IncidentDetailPage() {
 
       <h2>AI Log Analysis</h2>
       {incident.logAnalysis ? (
-        <textarea className="output" rows={10} readOnly value={incident.logAnalysis} />
+        <AiOutput content={incident.logAnalysis} />
       ) : (
         <p className="empty">No analysis yet. Add logs above and run the analyzer.</p>
       )}
@@ -142,7 +143,7 @@ export default function IncidentDetailPage() {
         </button>
       </div>
       {incident.rcaReport ? (
-        <textarea className="output" rows={16} readOnly value={incident.rcaReport} />
+        <AiOutput content={incident.rcaReport} />
       ) : (
         <p className="empty">No RCA yet.</p>
       )}

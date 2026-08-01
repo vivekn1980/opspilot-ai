@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Risk, RiskStatus } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function RiskDetailPage() {
   const params = useParams<{ id: string }>();
@@ -81,7 +82,7 @@ export default function RiskDetailPage() {
         </button>
       </div>
       {risk.mitigation ? (
-        <textarea className="output" rows={14} readOnly value={risk.mitigation} />
+        <AiOutput content={risk.mitigation} />
       ) : (
         <p className="empty">No mitigation plan drafted yet.</p>
       )}

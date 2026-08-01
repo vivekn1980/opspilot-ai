@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { ShiftHandover } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function ShiftHandoverDetailPage() {
   const params = useParams<{ id: string }>();
@@ -39,13 +40,9 @@ export default function ShiftHandoverDetailPage() {
         {new Date(handover.periodStart).toLocaleString()} → {new Date(handover.periodEnd).toLocaleString()}
       </h1>
       <p className="incident-meta">Generated {new Date(handover.createdAt).toLocaleString()}</p>
-      <textarea
-        className="output"
-        rows={20}
-        readOnly
-        value={handover.summary}
-        style={{ marginTop: "1rem" }}
-      />
+      <div style={{ marginTop: "1rem" }}>
+        <AiOutput content={handover.summary} />
+      </div>
     </main>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { ExecutiveReport } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function ExecutiveReportDetailPage() {
   const params = useParams<{ id: string }>();
@@ -40,7 +41,9 @@ export default function ExecutiveReportDetailPage() {
         {new Date(report.periodEnd).toLocaleDateString()}
       </h1>
       <p className="incident-meta">Generated {new Date(report.createdAt).toLocaleString()}</p>
-      <textarea className="output" rows={22} readOnly value={report.content} style={{ marginTop: "1rem" }} />
+      <div style={{ marginTop: "1rem" }}>
+        <AiOutput content={report.content} />
+      </div>
     </main>
   );
 }

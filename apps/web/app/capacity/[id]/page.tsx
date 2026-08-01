@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { CapacityReport } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function CapacityReportDetailPage() {
   const params = useParams<{ id: string }>();
@@ -42,7 +43,7 @@ export default function CapacityReportDetailPage() {
       <textarea className="output" rows={8} readOnly value={report.rawData} />
 
       <h2>Analysis</h2>
-      <textarea className="output" rows={16} readOnly value={report.narrative} />
+      <AiOutput content={report.narrative} />
     </main>
   );
 }

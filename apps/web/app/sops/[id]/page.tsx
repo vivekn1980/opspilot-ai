@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Sop } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function SopDetailPage() {
   const params = useParams<{ id: string }>();
@@ -37,7 +38,9 @@ export default function SopDetailPage() {
     <main>
       <h1>{sop.title}</h1>
       <p className="incident-meta">Generated {new Date(sop.createdAt).toLocaleString()}</p>
-      <textarea className="output" rows={24} readOnly value={sop.content} style={{ marginTop: "1rem" }} />
+      <div style={{ marginTop: "1rem" }}>
+        <AiOutput content={sop.content} />
+      </div>
     </main>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState, FormEvent } from "react";
 import { api } from "@/lib/api";
 import { ChatResult, Doc } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function DocsPage() {
   const [docs, setDocs] = useState<Doc[] | null>(null);
@@ -85,7 +86,7 @@ export default function DocsPage() {
         </form>
         {chatResult && (
           <div style={{ marginTop: "1rem" }}>
-            <textarea className="output" rows={8} readOnly value={chatResult.answer} />
+            <AiOutput content={chatResult.answer} />
             {chatResult.sources.length > 0 && (
               <p className="incident-meta" style={{ marginTop: "0.5rem" }}>
                 Sources: {chatResult.sources.map((s) => s.title).join(", ")}

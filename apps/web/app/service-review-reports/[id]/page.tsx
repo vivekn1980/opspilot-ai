@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { ServiceReviewReport } from "@/lib/types";
+import AiOutput from "@/components/ai-output";
 
 export default function ServiceReviewReportDetailPage() {
   const params = useParams<{ id: string }>();
@@ -41,7 +42,9 @@ export default function ServiceReviewReportDetailPage() {
         {new Date(report.periodEnd).toLocaleDateString()} · Generated{" "}
         {new Date(report.createdAt).toLocaleString()}
       </p>
-      <textarea className="output" rows={22} readOnly value={report.content} style={{ marginTop: "1rem" }} />
+      <div style={{ marginTop: "1rem" }}>
+        <AiOutput content={report.content} />
+      </div>
     </main>
   );
 }
