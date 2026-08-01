@@ -190,4 +190,129 @@ export class AiService {
     });
     return this.extractText(response.content);
   }
+
+  async draftRiskMitigation(input: {
+    title: string;
+    description: string;
+    likelihood: string;
+    impact: string;
+  }): Promise<string> {
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 1536,
+      output_config: { effort: "medium" },
+      system:
+        "You are the Risk Register assistant inside OpsPilot AI. Given a risk's description, likelihood, " +
+        "and impact, draft a mitigation plan. Use markdown sections: 'Recommended Mitigation', " +
+        "'Monitoring / Early Warning Signs', 'Contingency if the Risk Materializes'. Be concrete and " +
+        "specific to the risk described — avoid generic advice like 'improve monitoring' without saying " +
+        "what to monitor.",
+      messages: [
+        {
+          role: "user",
+          content:
+            `Risk: ${input.title}\n` +
+            `Description: ${input.description}\n` +
+            `Likelihood: ${input.likelihood}\n` +
+            `Impact: ${input.impact}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
+
+  async analyzeCapacity(input: { metricName: string; rawData: string }): Promise<string> {
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 2048,
+      output_config: { effort: "medium" },
+      system:
+        "You are the Capacity Planning assistant inside OpsPilot AI. Given a raw time series for one " +
+        "metric, identify the trend, flag anomalies or inflection points, and give a plain-language " +
+        "forecast of when the metric is likely to become a problem if the trend continues (or state that " +
+        "it looks stable if it does). Use markdown sections: 'Trend', 'Anomalies', 'Forecast', " +
+        "'Recommendation'. You are reasoning from the numbers given — don't invent data points, and say " +
+        "so plainly if the series is too short or noisy to forecast confidently.",
+      messages: [
+        {
+          role: "user",
+          content: `Metric: ${input.metricName}\n\nData:\n${input.rawData}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
+
+  async generateExecutiveReport(input: {
+    periodStart: string;
+    periodEnd: string;
+    kpiSummary: string;
+    incidents: { title: string; severity: string; status: string }[];
+    changes: { title: string; status: string; riskLevel: string }[];
+  }): Promise<string> {
+    const incidentList = input.incidents.length
+      ? input.incidents.map((i) => `- [${i.severity}/${i.status}] ${i.title}`).join("\n")
+      : "No incidents in this period.";
+    const changeList = input.changes.length
+      ? input.changes.map((c) => `- [${c.riskLevel}/${c.status}] ${c.title}`).join("\n")
+      : "No changes in this period.";
+
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 3072,
+      output_config: { effort: "medium" },
+      system:
+        "You are the Executive Report generator inside OpsPilot AI. Roll up a period's operational data " +
+        "into a leadership-level summary — assume the reader has limited time and no operational detail " +
+        "memorized. Use markdown sections: 'Headline', 'Reliability Summary', 'Notable Incidents', " +
+        "'Change Activity', 'Risks and Recommendations'. Lead with the headline takeaway, not a recap of " +
+        "every event. Translate technical severity into business impact where you can.",
+      messages: [
+        {
+          role: "user",
+          content:
+            `Reporting period: ${input.periodStart} to ${input.periodEnd}\n\n` +
+            `KPI summary:\n${input.kpiSummary}\n\n` +
+            `Incidents:\n${incidentList}\n\n` +
+            `Changes:\n${changeList}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
+
+  async generateServiceReviewReport(input: {
+    accountName: string;
+    periodStart: string;
+    periodEnd: string;
+    kpiSummary: string;
+    incidents: { title: string; severity: string; status: string }[];
+  }): Promise<string> {
+    const incidentList = input.incidents.length
+      ? input.incidents.map((i) => `- [${i.severity}/${i.status}] ${i.title}`).join("\n")
+      : "No incidents in this period.";
+
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 3072,
+      output_config: { effort: "medium" },
+      system:
+        "You are the Service Review Report generator inside OpsPilot AI, used mainly by MSPs for periodic " +
+        "account reviews (QBRs) with their customers. Write for the customer's audience, not internal " +
+        "engineering — professional, reassuring where warranted, honest about issues. Use markdown " +
+        "sections: 'Summary', 'Service Performance', 'Key Incidents', 'Looking Ahead'. Avoid internal " +
+        "jargon, ticket IDs, or hostnames.",
+      messages: [
+        {
+          role: "user",
+          content:
+            `Account: ${input.accountName}\n` +
+            `Reporting period: ${input.periodStart} to ${input.periodEnd}\n\n` +
+            `KPI summary:\n${input.kpiSummary}\n\n` +
+            `Incidents:\n${incidentList}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
 }

@@ -76,3 +76,85 @@ export interface CustomerUpdate {
   content: string;
   createdAt: string;
 }
+
+export interface KpiSummary {
+  totalIncidents: number;
+  openIncidents: number;
+  countsBySeverity: Record<string, number>;
+  countsByStatus: Record<string, number>;
+  mttrHours: number | null;
+  slaBreaches: number;
+  slaTargetHours: Record<string, number>;
+  generatedAt: string;
+}
+
+export type RiskStatus = "OPEN" | "MITIGATING" | "ACCEPTED" | "CLOSED";
+
+export interface Risk {
+  id: string;
+  title: string;
+  description: string;
+  likelihood: RiskLevel;
+  impact: RiskLevel;
+  status: RiskStatus;
+  mitigation: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CapacityReport {
+  id: string;
+  metricName: string;
+  rawData: string;
+  narrative: string;
+  createdAt: string;
+}
+
+export interface RunbookStep {
+  order: number;
+  description: string;
+  command?: string;
+}
+
+export interface RunbookStepResult {
+  order: number;
+  completed: boolean;
+  note?: string;
+}
+
+export interface Runbook {
+  id: string;
+  title: string;
+  description: string;
+  steps: RunbookStep[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RunbookRunStatus = "IN_PROGRESS" | "COMPLETED";
+
+export interface RunbookRun {
+  id: string;
+  runbookId: string;
+  status: RunbookRunStatus;
+  stepResults: RunbookStepResult[];
+  startedAt: string;
+  completedAt: string | null;
+}
+
+export interface ExecutiveReport {
+  id: string;
+  content: string;
+  periodStart: string;
+  periodEnd: string;
+  createdAt: string;
+}
+
+export interface ServiceReviewReport {
+  id: string;
+  accountName: string;
+  content: string;
+  periodStart: string;
+  periodEnd: string;
+  createdAt: string;
+}

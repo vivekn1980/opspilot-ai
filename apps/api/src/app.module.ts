@@ -7,6 +7,12 @@ import { ChangesModule } from "./changes/changes.module";
 import { SopsModule } from "./sops/sops.module";
 import { DocsModule } from "./docs/docs.module";
 import { ShiftHandoversModule } from "./shift-handovers/shift-handovers.module";
+import { KpiModule } from "./kpi/kpi.module";
+import { RisksModule } from "./risks/risks.module";
+import { CapacityModule } from "./capacity/capacity.module";
+import { RunbooksModule } from "./runbooks/runbooks.module";
+import { ExecutiveReportsModule } from "./executive-reports/executive-reports.module";
+import { ServiceReviewReportsModule } from "./service-review-reports/service-review-reports.module";
 
 @Module({
   imports: [
@@ -18,6 +24,12 @@ import { ShiftHandoversModule } from "./shift-handovers/shift-handovers.module";
     SopsModule,
     DocsModule,
     ShiftHandoversModule,
+    KpiModule,
+    RisksModule,
+    CapacityModule,
+    RunbooksModule,
+    ExecutiveReportsModule,
+    ServiceReviewReportsModule,
   ],
 })
 export class AppModule {}

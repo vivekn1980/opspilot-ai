@@ -1,4 +1,21 @@
-import { ChatResult, Change, CustomerUpdate, Doc, Incident, Problem, ShiftHandover, Sop } from "./types";
+import {
+  CapacityReport,
+  ChatResult,
+  Change,
+  CustomerUpdate,
+  Doc,
+  ExecutiveReport,
+  Incident,
+  KpiSummary,
+  Problem,
+  Risk,
+  Runbook,
+  RunbookRun,
+  RunbookStep,
+  ServiceReviewReport,
+  ShiftHandover,
+  Sop,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -80,5 +97,62 @@ export const api = {
     request<ShiftHandover>("/shift-handovers/generate", {
       method: "POST",
       body: JSON.stringify({ periodStart, periodEnd }),
+    }),
+
+  // KPI / SLA Dashboard
+  getKpiSummary: () => request<KpiSummary>("/kpi"),
+
+  // Risk Register
+  listRisks: () => request<Risk[]>("/risks"),
+  getRisk: (id: string) => request<Risk>(`/risks/${id}`),
+  createRisk: (data: { title: string; description: string; likelihood?: string; impact?: string }) =>
+    request<Risk>("/risks", { method: "POST", body: JSON.stringify(data) }),
+  updateRisk: (id: string, data: Partial<Risk>) =>
+    request<Risk>(`/risks/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  generateRiskMitigation: (id: string) =>
+    request<Risk>(`/risks/${id}/generate-mitigation`, { method: "POST" }),
+
+  // Capacity Planning
+  listCapacityReports: () => request<CapacityReport[]>("/capacity-reports"),
+  getCapacityReport: (id: string) => request<CapacityReport>(`/capacity-reports/${id}`),
+  generateCapacityReport: (metricName: string, rawData: string) =>
+    request<CapacityReport>("/capacity-reports/generate", {
+      method: "POST",
+      body: JSON.stringify({ metricName, rawData }),
+    }),
+
+  // Runbook Automation
+  listRunbooks: () => request<Runbook[]>("/runbooks"),
+  getRunbook: (id: string) => request<Runbook>(`/runbooks/${id}`),
+  createRunbook: (data: { title: string; description: string; steps: RunbookStep[] }) =>
+    request<Runbook>("/runbooks", { method: "POST", body: JSON.stringify(data) }),
+  startRunbookRun: (runbookId: string) =>
+    request<RunbookRun>(`/runbooks/${runbookId}/runs`, { method: "POST" }),
+  listRunbookRuns: (runbookId: string) =>
+    request<RunbookRun[]>(`/runbooks/${runbookId}/runs`),
+  getRunbookRun: (runbookId: string, runId: string) =>
+    request<RunbookRun>(`/runbooks/${runbookId}/runs/${runId}`),
+  updateRunbookStep: (runbookId: string, runId: string, order: number, completed: boolean, note?: string) =>
+    request<RunbookRun>(`/runbooks/${runbookId}/runs/${runId}/steps`, {
+      method: "PUT",
+      body: JSON.stringify({ order, completed, note }),
+    }),
+
+  // Executive Reports
+  listExecutiveReports: () => request<ExecutiveReport[]>("/executive-reports"),
+  getExecutiveReport: (id: string) => request<ExecutiveReport>(`/executive-reports/${id}`),
+  generateExecutiveReport: (periodStart: string, periodEnd: string) =>
+    request<ExecutiveReport>("/executive-reports/generate", {
+      method: "POST",
+      body: JSON.stringify({ periodStart, periodEnd }),
+    }),
+
+  // Service Review Reports
+  listServiceReviewReports: () => request<ServiceReviewReport[]>("/service-review-reports"),
+  getServiceReviewReport: (id: string) => request<ServiceReviewReport>(`/service-review-reports/${id}`),
+  generateServiceReviewReport: (accountName: string, periodStart: string, periodEnd: string) =>
+    request<ServiceReviewReport>("/service-review-reports/generate", {
+      method: "POST",
+      body: JSON.stringify({ accountName, periodStart, periodEnd }),
     }),
 };

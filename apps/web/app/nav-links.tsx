@@ -10,6 +10,12 @@ const LINKS = [
   { href: "/sops", label: "SOPs" },
   { href: "/docs", label: "Docs & Chat" },
   { href: "/shift-handovers", label: "Shift Handover" },
+  { href: "/kpi", label: "KPI / SLA" },
+  { href: "/risks", label: "Risks" },
+  { href: "/capacity", label: "Capacity" },
+  { href: "/runbooks", label: "Runbooks" },
+  { href: "/executive-reports", label: "Exec Reports" },
+  { href: "/service-review-reports", label: "Service Review" },
 ];
 
 export default function NavLinks() {

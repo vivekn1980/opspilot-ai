@@ -82,3 +82,63 @@ model CustomerUpdate {
   content    String
   createdAt  DateTime @default(now())
 }
+
+model Risk {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  likelihood  String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  impact      String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status      String   @default("OPEN") // OPEN, MITIGATING, ACCEPTED, CLOSED
+  mitigation  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// User pastes a raw metric time series (e.g. "date,value" lines); the AI
+// narrative is the forecast/anomaly explanation, not a modeled prediction —
+// there's no real metrics pipeline behind this in the MVP.
+model CapacityReport {
+  id         String   @id @default(cuid())
+  metricName String
+  rawData    String
+  narrative  String
+  createdAt  DateTime @default(now())
+}
+
+// Steps and step results are stored as JSON strings (SQLite has no native
+// JSON/array column) — see RunbookStep / RunbookStepResult types in the API.
+model Runbook {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  steps       String // JSON: RunbookStep[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RunbookRun {
+  id          String    @id @default(cuid())
+  runbookId   String
+  status      String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
+  stepResults String // JSON: RunbookStepResult[]
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+}
+
+model ExecutiveReport {
+  id          String   @id @default(cuid())
+  content     String
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model ServiceReviewReport {
+  id          String   @id @default(cuid())
+  accountName String
+  content     String
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime @default(now())
+}
