@@ -63,4 +63,94 @@ export class AiService {
     });
     return this.extractText(response.content);
   }
+
+  async generateSop(input: {
+    title: string;
+    description: string;
+    logAnalysis?: string | null;
+    rcaReport?: string | null;
+  }): Promise<string> {
+    const context = [
+      `Incident title: ${input.title}`,
+      `Incident description: ${input.description}`,
+      input.logAnalysis ? `Log analysis:\n${input.logAnalysis}` : null,
+      input.rcaReport ? `RCA report:\n${input.rcaReport}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 4096,
+      output_config: { effort: "medium" },
+      system:
+        "You are the SOP Generator inside OpsPilot AI. Turn a resolved incident into a draft Standard " +
+        "Operating Procedure a future on-call engineer can follow to detect and resolve the same class " +
+        "of issue. Use markdown with sections: 'When to Use This SOP', 'Detection', 'Diagnosis Steps', " +
+        "'Resolution Steps', 'Prevention'. Write imperative, numbered steps. Where the incident record " +
+        "doesn't give enough detail for a step, state the assumption plainly instead of inventing specifics.",
+      messages: [
+        {
+          role: "user",
+          content: `Draft an SOP from this resolved incident:\n\n${context}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
+
+  async chatWithDocs(question: string, contextDocs: { title: string; content: string }[]): Promise<string> {
+    const context = contextDocs
+      .map((d, i) => `Document ${i + 1}: ${d.title}\n${d.content}`)
+      .join("\n\n---\n\n");
+
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 2048,
+      output_config: { effort: "medium" },
+      system:
+        "You are the AI Chat with Documentation feature inside OpsPilot AI. Answer the user's question " +
+        "using only the provided documents. If the documents don't contain the answer, say so plainly " +
+        "instead of guessing. Cite which document(s) you drew from by title.",
+      messages: [
+        {
+          role: "user",
+          content: context
+            ? `Documents:\n\n${context}\n\n---\n\nQuestion: ${question}`
+            : `No documents were retrieved for this question. Question: ${question}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
+
+  async summarizeShift(input: {
+    periodStart: string;
+    periodEnd: string;
+    incidents: { title: string; severity: string; status: string; description: string }[];
+  }): Promise<string> {
+    const incidentList = input.incidents.length
+      ? input.incidents
+          .map((i) => `- [${i.severity}/${i.status}] ${i.title}: ${i.description}`)
+          .join("\n")
+      : "No incidents were logged during this period.";
+
+    const response = await this.client.messages.create({
+      model: MODEL,
+      max_tokens: 2048,
+      output_config: { effort: "medium" },
+      system:
+        "You are the Shift Handover generator inside OpsPilot AI. Summarize a shift's activity into a " +
+        "structured handover note for the next on-call engineer. Use markdown sections: 'Overview', " +
+        "'Open Items Needing Attention', 'Resolved This Shift', 'Watch List'. Be concrete and brief — " +
+        "the reader is about to take over and needs the essentials, not a narrative.",
+      messages: [
+        {
+          role: "user",
+          content: `Shift window: ${input.periodStart} to ${input.periodEnd}\n\nIncidents during this window:\n${incidentList}`,
+        },
+      ],
+    });
+    return this.extractText(response.content);
+  }
 }

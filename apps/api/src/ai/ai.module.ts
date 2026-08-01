@@ -7,5 +7,6 @@ import { IncidentsModule } from "../incidents/incidents.module";
   imports: [IncidentsModule],
   controllers: [AiController],
   providers: [AiService],
+  exports: [AiService],
 })
 export class AiModule {}

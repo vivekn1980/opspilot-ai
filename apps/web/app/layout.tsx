@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import NavLinks from "./nav-links";
 
 export const metadata: Metadata = {
   title: "OpsPilot AI",
@@ -15,9 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" className="brand">
               <span>Ops</span>Pilot
             </a>
-            <a href="/incidents/new" className="btn">
-              + New Incident
-            </a>
+            <NavLinks />
           </div>
           {children}
         </div>

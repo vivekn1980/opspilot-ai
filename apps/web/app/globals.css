@@ -40,11 +40,36 @@ a {
 
 .topbar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   border-bottom: 1px solid var(--border);
   padding-bottom: 1.1rem;
   margin-bottom: 1.75rem;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.nav-link {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.nav-link.active {
+  color: var(--text);
+  background: var(--accent-soft);
 }
 
 .brand {
@@ -204,6 +229,18 @@ textarea.output {
   background: var(--surface);
   color: var(--text);
   white-space: pre-wrap;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-header p {
+  margin-top: 0;
 }
 
 h1 {

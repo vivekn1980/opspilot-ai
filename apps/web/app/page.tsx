@@ -32,10 +32,17 @@ export default function DashboardPage() {
 
   return (
     <main>
-      <h1>Incidents</h1>
-      <p style={{ color: "var(--text-muted)", marginTop: 0 }}>
-        Detect, understand, and communicate incidents from one place.
-      </p>
+      <div className="page-header">
+        <div>
+          <h1>Incidents</h1>
+          <p style={{ color: "var(--text-muted)" }}>
+            Detect, understand, and communicate incidents from one place.
+          </p>
+        </div>
+        <Link href="/incidents/new" className="btn">
+          + New Incident
+        </Link>
+      </div>
 
       {error && <p className="error">Failed to load incidents: {error}</p>}
 
