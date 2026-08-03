@@ -140,6 +140,9 @@ export default function HomePage() {
         </Link>
       </div>
 
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/zigzag-divider.gif" alt="" aria-hidden="true" className="zigzag-divider" />
+
       {error && <p className="error">Failed to load dashboard: {error}</p>}
       {loading && !error && <p className="empty">Loading…</p>}
 
