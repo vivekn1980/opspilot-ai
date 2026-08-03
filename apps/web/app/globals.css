@@ -251,15 +251,6 @@ textarea.output {
   margin-top: 0;
 }
 
-.zigzag-divider {
-  display: block;
-  width: 220px;
-  max-width: 40%;
-  height: auto;
-  margin: 1.4rem auto 1.9rem;
-  opacity: 0.85;
-}
-
 h1 {
   font-size: 1.5rem;
   margin: 0 0 0.3rem;
