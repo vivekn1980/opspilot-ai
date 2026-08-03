@@ -150,3 +150,15 @@ model AppSetting {
   key   String @id
   value String
 }
+
+// Named metric time-series snapshots the AI Monitoring Assistant answers
+// questions against. Same "paste it in" pattern as CapacityReport — there's
+// no live metrics ingest pipeline in the MVP (see docs/ARCHITECTURE.md's
+// integration hub for the target Datadog/Prometheus/CloudWatch connectors).
+model Metric {
+  id        String   @id @default(cuid())
+  name      String
+  rawData   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

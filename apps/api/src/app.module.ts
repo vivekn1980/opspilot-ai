@@ -14,6 +14,7 @@ import { RunbooksModule } from "./runbooks/runbooks.module";
 import { ExecutiveReportsModule } from "./executive-reports/executive-reports.module";
 import { ServiceReviewReportsModule } from "./service-review-reports/service-review-reports.module";
 import { SettingsModule } from "./settings/settings.module";
+import { MonitoringModule } from "./monitoring/monitoring.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SettingsModule } from "./settings/settings.module";
     RunbooksModule,
     ExecutiveReportsModule,
     ServiceReviewReportsModule,
+    MonitoringModule,
   ],
 })
 export class AppModule {}

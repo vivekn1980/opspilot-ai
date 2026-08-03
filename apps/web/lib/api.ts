@@ -9,6 +9,8 @@ import {
   ExecutiveReport,
   Incident,
   KpiSummary,
+  Metric,
+  MonitoringAskResult,
   Problem,
   Risk,
   Runbook,
@@ -157,6 +159,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ accountName, periodStart, periodEnd }),
     }),
+
+  // AI Monitoring Assistant
+  listMetrics: () => request<Metric[]>("/metrics"),
+  createMetric: (data: { name: string; rawData: string }) =>
+    request<Metric>("/metrics", { method: "POST", body: JSON.stringify(data) }),
+  askMonitoring: (question: string) =>
+    request<MonitoringAskResult>("/metrics/ask", { method: "POST", body: JSON.stringify({ question }) }),
 
   // Settings
   getSettings: () => request<AppSettings>("/settings"),

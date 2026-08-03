@@ -286,6 +286,25 @@ export class AiService {
     });
   }
 
+  async analyzeMetrics(question: string, metrics: { name: string; rawData: string }[]): Promise<string> {
+    const context = metrics
+      .map((m, i) => `Metric ${i + 1}: ${m.name}\n${m.rawData}`)
+      .join("\n\n---\n\n");
+
+    return this.complete({
+      maxTokens: 2048,
+      system:
+        "You are the AI Monitoring Assistant inside OpsPilot AI. Answer the user's question using only " +
+        "the provided metric time series, and proactively flag any anomalies, spikes, drops, or suspicious " +
+        "patterns you notice in the data — even ones the question didn't directly ask about. Reason only " +
+        "from the numbers given; if a metric needed to answer isn't provided, say so plainly instead of " +
+        "guessing. Cite metric names when relevant.",
+      userContent: context
+        ? `Metrics:\n\n${context}\n\n---\n\nQuestion: ${question}`
+        : `No metrics were provided for this question. Question: ${question}`,
+    });
+  }
+
   async generateServiceReviewReport(input: {
     accountName: string;
     periodStart: string;

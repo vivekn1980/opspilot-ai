@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/changes", label: "Changes" },
   { href: "/sops", label: "SOPs" },
   { href: "/docs", label: "Docs & Chat" },
+  { href: "/monitoring", label: "Monitoring" },
   { href: "/shift-handovers", label: "Shift Handover" },
   { href: "/kpi", label: "KPI / SLA" },
   { href: "/risks", label: "Risks" },

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { Change, Doc, Incident, KpiSummary, Problem, Risk, Runbook, Sop } from "@/lib/types";
+import { Change, Doc, Incident, KpiSummary, Metric, Problem, Risk, Runbook, Sop } from "@/lib/types";
 import { severityDot, statusDot } from "@/lib/badges";
 
 const RESOLVED_STATUSES = ["RESOLVED", "CLOSED"];
@@ -21,6 +21,7 @@ export default function HomePage() {
   const [runbooks, setRunbooks] = useState<Runbook[] | null>(null);
   const [sops, setSops] = useState<Sop[] | null>(null);
   const [docs, setDocs] = useState<Doc[] | null>(null);
+  const [metrics, setMetrics] = useState<Metric[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,8 +34,9 @@ export default function HomePage() {
       api.listRunbooks(),
       api.listSops(),
       api.listDocs(),
+      api.listMetrics(),
     ])
-      .then(([kpi, incidents, problems, changes, risks, runbooks, sops, docs]) => {
+      .then(([kpi, incidents, problems, changes, risks, runbooks, sops, docs, metrics]) => {
         setKpi(kpi);
         setIncidents(incidents);
         setProblems(problems);
@@ -43,11 +45,13 @@ export default function HomePage() {
         setRunbooks(runbooks);
         setSops(sops);
         setDocs(docs);
+        setMetrics(metrics);
       })
       .catch((e) => setError(String(e.message ?? e)));
   }, []);
 
-  const loading = !kpi || !incidents || !problems || !changes || !risks || !runbooks || !sops || !docs;
+  const loading =
+    !kpi || !incidents || !problems || !changes || !risks || !runbooks || !sops || !docs || !metrics;
 
   const recentIncidents = incidents?.slice(0, 5) ?? [];
   const breaching =
@@ -102,6 +106,12 @@ export default function HomePage() {
       meta: `${docs?.length ?? 0} documents`,
     },
     { href: "/capacity", label: "Capacity Planning", desc: "Trend and forecast reads on pasted metrics", meta: null },
+    {
+      href: "/monitoring",
+      label: "AI Monitoring Assistant",
+      desc: "Ask questions and catch anomalies across pasted metric snapshots",
+      meta: `${metrics?.length ?? 0} metric snapshots`,
+    },
     {
       href: "/shift-handovers",
       label: "Shift Handover",

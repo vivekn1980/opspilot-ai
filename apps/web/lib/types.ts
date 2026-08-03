@@ -164,3 +164,16 @@ export interface ServiceReviewReport {
   periodEnd: string;
   createdAt: string;
 }
+
+export interface Metric {
+  id: string;
+  name: string;
+  rawData: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MonitoringAskResult {
+  answer: string;
+  sources: { id: string; name: string }[];
+}
