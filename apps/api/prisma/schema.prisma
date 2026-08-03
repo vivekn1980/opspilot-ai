@@ -197,13 +197,16 @@ model Metric {
   updatedAt   DateTime @updatedAt
 }
 
-// Individual accounts. No roles/tiers in this MVP — every authenticated
-// user has full access; createdById fields elsewhere are for attribution
-// ("who did this"), not for access control.
+// Individual accounts. role gates write access (see RolesGuard): VIEWER can
+// read everything but not create/edit/delete/generate; ADMIN can do both.
+// The first account ever registered becomes ADMIN automatically (nothing
+// else could grant that role yet); every registration after that defaults
+// to VIEWER and needs an existing admin to promote it.
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   passwordHash String
   name         String
+  role         String   @default("VIEWER")
   createdAt    DateTime @default(now())
 }

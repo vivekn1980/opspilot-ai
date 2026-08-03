@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException } from "@nestjs/common";
 import { Response } from "express";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
@@ -46,7 +46,9 @@ export class AuthController {
   }
 
   @Get("me")
-  me(@CurrentUser() user: CurrentUserPayload) {
-    return { user };
+  async me(@CurrentUser() user: CurrentUserPayload) {
+    const fresh = await this.authService.getUserById(user.id);
+    if (!fresh) throw new UnauthorizedException();
+    return { user: fresh };
   }
 }

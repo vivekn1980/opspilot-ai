@@ -8,6 +8,10 @@ export default function UserBadge() {
 
   return (
     <div className="user-badge">
+      <span className="pill">
+        <span className={`dot ${user.role === "ADMIN" ? "dot-good" : "dot-muted"}`} />
+        {user.role}
+      </span>
       <span>{user.name}</span>
       <button
         type="button"

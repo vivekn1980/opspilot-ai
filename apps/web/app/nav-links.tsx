@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -20,14 +21,16 @@ const LINKS = [
   { href: "/service-review-reports", label: "Service Review" },
   { href: "/ai-usage", label: "AI Usage" },
   { href: "/settings", label: "Settings" },
+  { href: "/users", label: "Users", adminOnly: true },
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <nav className="nav-links">
-      {LINKS.map((link) => {
+      {LINKS.filter((link) => !link.adminOnly || user?.role === "ADMIN").map((link) => {
         const active = link.href === "/" ? pathname === "/" : pathname?.startsWith(link.href);
         return (
           <Link key={link.href} href={link.href} className={active ? "nav-link active" : "nav-link"}>

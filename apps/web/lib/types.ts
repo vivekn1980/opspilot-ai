@@ -1,7 +1,18 @@
+export type Role = "ADMIN" | "VIEWER";
+
 export interface User {
   id: string;
   email: string;
   name: string;
+  role: Role;
+}
+
+export interface ManagedUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  createdAt: string;
 }
 
 export type AiProvider = "KIMI" | "ANTHROPIC";

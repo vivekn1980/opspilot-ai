@@ -21,6 +21,8 @@ import {
   Runbook,
   RunbookRun,
   RunbookStep,
+  ManagedUser,
+  Role,
   ServiceReviewReport,
   ShiftHandover,
   Sop,
@@ -53,6 +55,11 @@ export const api = {
     request<{ user: User }>("/auth/login", { method: "POST", body: JSON.stringify(data) }),
   logout: () => request<{ ok: boolean }>("/auth/logout", { method: "POST" }),
   getCurrentUser: () => request<{ user: User }>("/auth/me"),
+
+  // User management (admin only)
+  listUsers: () => request<ManagedUser[]>("/users"),
+  updateUserRole: (id: string, role: Role) =>
+    request<ManagedUser>(`/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role }) }),
 
   // Incidents
   listIncidents: () => request<Incident[]>("/incidents"),
