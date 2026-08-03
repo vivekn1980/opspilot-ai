@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { AiProvider } from "../settings/constants";
 import { SettingsService } from "../settings/settings.service";
+import { AiUsageService } from "../ai-usage/ai-usage.service";
 
 const ANTHROPIC_MODEL = "claude-opus-5";
 const KIMI_MODEL = "moonshotai/kimi-k3-free";
@@ -22,6 +23,13 @@ interface CompleteParams {
   system: string;
   userContent: string;
   maxTokens: number;
+  feature: string;
+}
+
+interface ProviderResponse {
+  text: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
 }
 
 @Injectable()
@@ -41,7 +49,10 @@ export class AiService {
     maxRetries: 0,
   });
 
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(
+    private readonly settingsService: SettingsService,
+    private readonly aiUsageService: AiUsageService,
+  ) {}
 
   private isTimeoutError(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error);
@@ -50,11 +61,35 @@ export class AiService {
 
   private async complete(params: CompleteParams): Promise<string> {
     const provider = await this.settingsService.getAiProvider();
+    const startedAt = Date.now();
     try {
-      return provider === "ANTHROPIC"
-        ? await this.completeWithAnthropic(params)
-        : await this.completeWithKimi(params);
+      const response =
+        provider === "ANTHROPIC"
+          ? await this.completeWithAnthropic(params)
+          : await this.completeWithKimi(params);
+
+      this.aiUsageService.recordBestEffort({
+        provider,
+        feature: params.feature,
+        success: true,
+        inputTokens: response.inputTokens,
+        outputTokens: response.outputTokens,
+        latencyMs: Date.now() - startedAt,
+      });
+
+      return response.text;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.aiUsageService.recordBestEffort({
+        provider,
+        feature: params.feature,
+        success: false,
+        errorMessage,
+        inputTokens: null,
+        outputTokens: null,
+        latencyMs: Date.now() - startedAt,
+      });
+
       if (this.isTimeoutError(error)) {
         throw new RequestTimeoutException(
           `${PROVIDER_LABEL[provider]} didn't respond within ${AI_REQUEST_TIMEOUT_MS / 1000}s. ` +
@@ -65,7 +100,7 @@ export class AiService {
     }
   }
 
-  private async completeWithAnthropic(params: CompleteParams): Promise<string> {
+  private async completeWithAnthropic(params: CompleteParams): Promise<ProviderResponse> {
     const response = await this.anthropicClient.messages.create({
       model: ANTHROPIC_MODEL,
       max_tokens: params.maxTokens,
@@ -74,10 +109,14 @@ export class AiService {
       messages: [{ role: "user", content: params.userContent }],
     });
     const block = response.content.find((b) => b.type === "text");
-    return block && block.type === "text" ? block.text : "";
+    return {
+      text: block && block.type === "text" ? block.text : "",
+      inputTokens: response.usage?.input_tokens ?? null,
+      outputTokens: response.usage?.output_tokens ?? null,
+    };
   }
 
-  private async completeWithKimi(params: CompleteParams): Promise<string> {
+  private async completeWithKimi(params: CompleteParams): Promise<ProviderResponse> {
     const response = await this.kimiClient.chat.completions.create({
       model: KIMI_MODEL,
       max_tokens: params.maxTokens,
@@ -86,11 +125,16 @@ export class AiService {
         { role: "user", content: params.userContent },
       ],
     });
-    return response.choices[0]?.message?.content ?? "";
+    return {
+      text: response.choices[0]?.message?.content ?? "",
+      inputTokens: response.usage?.prompt_tokens ?? null,
+      outputTokens: response.usage?.completion_tokens ?? null,
+    };
   }
 
   async analyzeLogs(rawLogs: string): Promise<string> {
     return this.complete({
+      feature: "analyzeLogs",
       maxTokens: 4096,
       system:
         "You are the AI Log Analyzer inside OpsPilot AI, an IT operations platform. " +
@@ -115,6 +159,7 @@ export class AiService {
       .join("\n\n");
 
     return this.complete({
+      feature: "generateRca",
       maxTokens: 4096,
       system:
         "You are the RCA Generator inside OpsPilot AI. Draft a root cause analysis document from the " +
@@ -141,6 +186,7 @@ export class AiService {
       .join("\n\n");
 
     return this.complete({
+      feature: "generateSop",
       maxTokens: 4096,
       system:
         "You are the SOP Generator inside OpsPilot AI. Turn a resolved incident into a draft Standard " +
@@ -158,6 +204,7 @@ export class AiService {
       .join("\n\n---\n\n");
 
     return this.complete({
+      feature: "chatWithDocs",
       maxTokens: 2048,
       system:
         "You are the AI Chat with Documentation feature inside OpsPilot AI. Answer the user's question " +
@@ -181,6 +228,7 @@ export class AiService {
       : "No incidents were logged during this period.";
 
     return this.complete({
+      feature: "summarizeShift",
       maxTokens: 2048,
       system:
         "You are the Shift Handover generator inside OpsPilot AI. Summarize a shift's activity into a " +
@@ -203,6 +251,7 @@ export class AiService {
       : "No previous updates have been sent for this incident.";
 
     return this.complete({
+      feature: "generateCustomerUpdate",
       maxTokens: 1024,
       system:
         "You are the Customer Update Generator inside OpsPilot AI. Draft a short, plain-language status " +
@@ -227,6 +276,7 @@ export class AiService {
     impact: string;
   }): Promise<string> {
     return this.complete({
+      feature: "draftRiskMitigation",
       maxTokens: 1536,
       system:
         "You are the Risk Register assistant inside OpsPilot AI. Given a risk's description, likelihood, " +
@@ -244,6 +294,7 @@ export class AiService {
 
   async analyzeCapacity(input: { metricName: string; rawData: string }): Promise<string> {
     return this.complete({
+      feature: "analyzeCapacity",
       maxTokens: 2048,
       system:
         "You are the Capacity Planning assistant inside OpsPilot AI. Given a raw time series for one " +
@@ -271,6 +322,7 @@ export class AiService {
       : "No changes in this period.";
 
     return this.complete({
+      feature: "generateExecutiveReport",
       maxTokens: 3072,
       system:
         "You are the Executive Report generator inside OpsPilot AI. Roll up a period's operational data " +
@@ -292,6 +344,7 @@ export class AiService {
       .join("\n\n---\n\n");
 
     return this.complete({
+      feature: "analyzeMetrics",
       maxTokens: 2048,
       system:
         "You are the AI Monitoring Assistant inside OpsPilot AI. Answer the user's question using only " +
@@ -317,6 +370,7 @@ export class AiService {
       : "No incidents in this period.";
 
     return this.complete({
+      feature: "generateServiceReviewReport",
       maxTokens: 3072,
       system:
         "You are the Service Review Report generator inside OpsPilot AI, used mainly by MSPs for periodic " +

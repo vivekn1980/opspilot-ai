@@ -9,6 +9,8 @@ import {
   ExecutiveReport,
   Incident,
   KpiSummary,
+  AiUsageLogEntry,
+  AiUsageSummary,
   AlertResult,
   Metric,
   MonitoringAskResult,
@@ -172,6 +174,10 @@ export const api = {
 
   // Global search
   search: (q: string) => request<{ results: SearchResult[] }>(`/search?q=${encodeURIComponent(q)}`),
+
+  // AI usage / cost tracking
+  getAiUsageSummary: () => request<AiUsageSummary>("/ai-usage/summary"),
+  getRecentAiUsage: () => request<AiUsageLogEntry[]>("/ai-usage/recent"),
 
   // Notifications
   getNotificationStatus: () => request<NotificationStatus>("/notifications/status"),

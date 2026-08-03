@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { Change, Doc, Incident, KpiSummary, Metric, Problem, Risk, Runbook, Sop } from "@/lib/types";
+import { AiUsageSummary, Change, Doc, Incident, KpiSummary, Metric, Problem, Risk, Runbook, Sop } from "@/lib/types";
 import { severityDot, statusDot } from "@/lib/badges";
 
 const RESOLVED_STATUSES = ["RESOLVED", "CLOSED"];
@@ -22,6 +22,7 @@ export default function HomePage() {
   const [sops, setSops] = useState<Sop[] | null>(null);
   const [docs, setDocs] = useState<Doc[] | null>(null);
   const [metrics, setMetrics] = useState<Metric[] | null>(null);
+  const [aiUsage, setAiUsage] = useState<AiUsageSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,8 +36,9 @@ export default function HomePage() {
       api.listSops(),
       api.listDocs(),
       api.listMetrics(),
+      api.getAiUsageSummary(),
     ])
-      .then(([kpi, incidents, problems, changes, risks, runbooks, sops, docs, metrics]) => {
+      .then(([kpi, incidents, problems, changes, risks, runbooks, sops, docs, metrics, aiUsage]) => {
         setKpi(kpi);
         setIncidents(incidents);
         setProblems(problems);
@@ -46,12 +48,22 @@ export default function HomePage() {
         setSops(sops);
         setDocs(docs);
         setMetrics(metrics);
+        setAiUsage(aiUsage);
       })
       .catch((e) => setError(String(e.message ?? e)));
   }, []);
 
   const loading =
-    !kpi || !incidents || !problems || !changes || !risks || !runbooks || !sops || !docs || !metrics;
+    !kpi ||
+    !incidents ||
+    !problems ||
+    !changes ||
+    !risks ||
+    !runbooks ||
+    !sops ||
+    !docs ||
+    !metrics ||
+    !aiUsage;
 
   const recentIncidents = incidents?.slice(0, 5) ?? [];
   const breaching =
@@ -125,6 +137,12 @@ export default function HomePage() {
       label: "Service Review",
       desc: "Account-facing QBR-style reports for MSP customers",
       meta: null,
+    },
+    {
+      href: "/ai-usage",
+      label: "AI Usage",
+      desc: "Calls, tokens, and latency by provider across every AI feature",
+      meta: `${aiUsage?.totalCalls ?? 0} calls logged`,
     },
   ];
 

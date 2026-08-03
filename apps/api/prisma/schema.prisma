@@ -154,6 +154,23 @@ model AppSetting {
   value String
 }
 
+// One row per AI call, written by AiService.complete() regardless of which
+// public method (analyzeLogs, generateRca, ...) triggered it. Token counts
+// are null when a provider's response didn't include usage data (or the
+// call failed before a response came back) — cost tracking is opt-in
+// visibility, not a hard requirement of the AI features themselves.
+model AiUsageLog {
+  id           String   @id @default(cuid())
+  provider     String
+  feature      String
+  success      Boolean
+  errorMessage String?
+  inputTokens  Int?
+  outputTokens Int?
+  latencyMs    Int
+  createdAt    DateTime @default(now())
+}
+
 // Named metric time-series snapshots the AI Monitoring Assistant answers
 // questions against. Same "paste it in" pattern as CapacityReport — there's
 // no live metrics ingest pipeline in the MVP (see docs/ARCHITECTURE.md's

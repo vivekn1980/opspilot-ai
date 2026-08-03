@@ -194,3 +194,31 @@ export interface SearchResult {
   meta: string;
   href: string;
 }
+
+export interface AiUsageProviderSummary {
+  provider: string;
+  calls: number;
+  successes: number;
+  failures: number;
+  inputTokens: number;
+  outputTokens: number;
+  avgLatencyMs: number;
+}
+
+export interface AiUsageSummary {
+  totalCalls: number;
+  totalFailures: number;
+  providers: AiUsageProviderSummary[];
+}
+
+export interface AiUsageLogEntry {
+  id: string;
+  provider: string;
+  feature: string;
+  success: boolean;
+  errorMessage: string | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  latencyMs: number;
+  createdAt: string;
+}

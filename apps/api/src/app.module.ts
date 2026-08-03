@@ -17,6 +17,7 @@ import { SettingsModule } from "./settings/settings.module";
 import { MonitoringModule } from "./monitoring/monitoring.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { SearchModule } from "./search/search.module";
+import { AiUsageModule } from "./ai-usage/ai-usage.module";
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SearchModule } from "./search/search.module";
     MonitoringModule,
     NotificationsModule,
     SearchModule,
+    AiUsageModule,
   ],
 })
 export class AppModule {}
