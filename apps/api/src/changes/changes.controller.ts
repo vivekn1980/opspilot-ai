@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/commo
 import { ChangesService } from "./changes.service";
 import { CreateChangeDto } from "./dto/create-change.dto";
 import { UpdateChangeDto } from "./dto/update-change.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("changes")
 export class ChangesController {
   constructor(private readonly changesService: ChangesService) {}
 
   @Post()
-  create(@Body() dto: CreateChangeDto) {
-    return this.changesService.create(dto);
+  create(@Body() dto: CreateChangeDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.changesService.create(dto, user.id);
   }
 
   @Get()

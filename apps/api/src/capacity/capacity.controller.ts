@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { CapacityService } from "./capacity.service";
 import { GenerateCapacityReportDto } from "./dto/generate-capacity-report.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("capacity-reports")
 export class CapacityController {
@@ -17,7 +18,7 @@ export class CapacityController {
   }
 
   @Post("generate")
-  generate(@Body() dto: GenerateCapacityReportDto) {
-    return this.capacityService.generate(dto.metricName, dto.rawData);
+  generate(@Body() dto: GenerateCapacityReportDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.capacityService.generate(dto.metricName, dto.rawData, user.id);
   }
 }

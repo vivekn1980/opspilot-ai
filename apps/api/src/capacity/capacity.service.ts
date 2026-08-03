@@ -21,8 +21,10 @@ export class CapacityService {
     return report;
   }
 
-  async generate(metricName: string, rawData: string) {
+  async generate(metricName: string, rawData: string, userId: string) {
     const narrative = await this.aiService.analyzeCapacity({ metricName, rawData });
-    return this.prisma.capacityReport.create({ data: { metricName, rawData, narrative } });
+    return this.prisma.capacityReport.create({
+      data: { metricName, rawData, narrative, createdById: userId },
+    });
   }
 }

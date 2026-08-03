@@ -23,7 +23,7 @@ export class SopsService {
     return sop;
   }
 
-  async generate(incidentId: string) {
+  async generate(incidentId: string, userId: string) {
     const incident = await this.incidentsService.findOne(incidentId);
     const content = await this.aiService.generateSop({
       title: incident.title,
@@ -36,6 +36,7 @@ export class SopsService {
         title: `SOP: ${incident.title}`,
         content,
         sourceIncidentId: incident.id,
+        createdById: userId,
       },
     });
   }

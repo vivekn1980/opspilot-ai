@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common"
 import { RunbooksService } from "./runbooks.service";
 import { CreateRunbookDto } from "./dto/create-runbook.dto";
 import { UpdateStepResultDto } from "./dto/update-step-result.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("runbooks")
 export class RunbooksController {
   constructor(private readonly runbooksService: RunbooksService) {}
 
   @Post()
-  create(@Body() dto: CreateRunbookDto) {
-    return this.runbooksService.create(dto);
+  create(@Body() dto: CreateRunbookDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.runbooksService.create(dto, user.id);
   }
 
   @Get()
@@ -28,8 +29,8 @@ export class RunbooksController {
   }
 
   @Post(":id/runs")
-  startRun(@Param("id") id: string) {
-    return this.runbooksService.startRun(id);
+  startRun(@Param("id") id: string, @CurrentUser() user: CurrentUserPayload) {
+    return this.runbooksService.startRun(id, user.id);
   }
 
   @Get(":id/runs")

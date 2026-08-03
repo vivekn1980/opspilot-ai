@@ -17,12 +17,13 @@ function withParsedResults(run: RunbookRun) {
 export class RunbooksService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateRunbookDto) {
+  async create(dto: CreateRunbookDto, userId: string) {
     const runbook = await this.prisma.runbook.create({
       data: {
         title: dto.title,
         description: dto.description,
         steps: JSON.stringify(dto.steps),
+        createdById: userId,
       },
     });
     return withParsedSteps(runbook);
@@ -46,14 +47,14 @@ export class RunbooksService {
     await this.prisma.runbook.delete({ where: { id } });
   }
 
-  async startRun(runbookId: string) {
+  async startRun(runbookId: string, userId: string) {
     const runbook = await this.findOne(runbookId);
     const stepResults: RunbookStepResult[] = runbook.steps.map((s) => ({
       order: s.order,
       completed: false,
     }));
     const run = await this.prisma.runbookRun.create({
-      data: { runbookId, stepResults: JSON.stringify(stepResults) },
+      data: { runbookId, stepResults: JSON.stringify(stepResults), createdById: userId },
     });
     return withParsedResults(run);
   }

@@ -43,8 +43,8 @@ export class DocsService {
     private readonly aiService: AiService,
   ) {}
 
-  create(dto: CreateDocDto) {
-    return this.prisma.doc.create({ data: dto });
+  create(dto: CreateDocDto, userId: string) {
+    return this.prisma.doc.create({ data: { ...dto, createdById: userId } });
   }
 
   findAll() {

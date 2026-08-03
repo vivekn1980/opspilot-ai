@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ExecutiveReportsService } from "./executive-reports.service";
 import { GenerateExecutiveReportDto } from "./dto/generate-executive-report.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("executive-reports")
 export class ExecutiveReportsController {
@@ -17,7 +18,7 @@ export class ExecutiveReportsController {
   }
 
   @Post("generate")
-  generate(@Body() dto: GenerateExecutiveReportDto) {
-    return this.executiveReportsService.generate(dto.periodStart, dto.periodEnd);
+  generate(@Body() dto: GenerateExecutiveReportDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.executiveReportsService.generate(dto.periodStart, dto.periodEnd, user.id);
   }
 }

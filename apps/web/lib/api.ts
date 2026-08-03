@@ -24,6 +24,7 @@ import {
   ServiceReviewReport,
   ShiftHandover,
   Sop,
+  User,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -32,6 +33,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}/api${path}`, {
     ...init,
     cache: "no-store",
+    // Carries the httpOnly auth cookie on every request — required since
+    // the API and web app run on different ports (different origins).
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
   if (!res.ok) {
@@ -42,6 +46,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // Auth
+  register: (data: { email: string; password: string; name: string }) =>
+    request<{ user: User }>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
+  login: (data: { email: string; password: string }) =>
+    request<{ user: User }>("/auth/login", { method: "POST", body: JSON.stringify(data) }),
+  logout: () => request<{ ok: boolean }>("/auth/logout", { method: "POST" }),
+  getCurrentUser: () => request<{ user: User }>("/auth/me"),
+
   // Incidents
   listIncidents: () => request<Incident[]>("/incidents"),
   getIncident: (id: string) => request<Incident>(`/incidents/${id}`),

@@ -7,10 +7,10 @@ import { UpdateChangeDto } from "./dto/update-change.dto";
 export class ChangesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(dto: CreateChangeDto) {
+  create(dto: CreateChangeDto, userId: string) {
     const { scheduledAt, ...rest } = dto;
     return this.prisma.change.create({
-      data: { ...rest, scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined },
+      data: { ...rest, scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined, createdById: userId },
     });
   }
 

@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import NavLinks from "./nav-links";
-import ModelBadge from "./model-badge";
-import GlobalSearch from "../components/global-search";
+import { AuthProvider } from "../lib/auth-context";
+import AppShell from "./app-shell";
 
 export const metadata: Metadata = {
   title: "OpsPilot AI",
@@ -18,18 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className="shell">
-          <div className="topbar">
-            <a href="/" className="brand">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="OpsPilot AI" className="brand-logo" />
-            </a>
-            <NavLinks />
-            <GlobalSearch />
-            <ModelBadge />
-          </div>
-          {children}
-        </div>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );

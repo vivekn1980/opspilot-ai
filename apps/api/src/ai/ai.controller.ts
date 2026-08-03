@@ -3,6 +3,7 @@ import { IsOptional, IsString } from "class-validator";
 import { AiService } from "./ai.service";
 import { IncidentsService } from "../incidents/incidents.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 class AnalyzeLogsDto {
   @IsString()
@@ -49,7 +50,7 @@ export class AiController {
   }
 
   @Post("customer-updates/generate")
-  async generateCustomerUpdate(@Param("id") id: string) {
+  async generateCustomerUpdate(@Param("id") id: string, @CurrentUser() user: CurrentUserPayload) {
     const incident = await this.incidentsService.findOne(id);
     const priorUpdates = await this.prisma.customerUpdate.findMany({
       where: { incidentId: id },
@@ -62,6 +63,6 @@ export class AiController {
       status: incident.status,
       priorUpdates: priorUpdates.map((u) => u.content),
     });
-    return this.prisma.customerUpdate.create({ data: { incidentId: id, content } });
+    return this.prisma.customerUpdate.create({ data: { incidentId: id, content, createdById: user.id } });
   }
 }

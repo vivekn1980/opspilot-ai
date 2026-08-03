@@ -11,8 +11,8 @@ export class IncidentsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  async create(dto: CreateIncidentDto) {
-    const incident = await this.prisma.incident.create({ data: dto });
+  async create(dto: CreateIncidentDto, userId: string) {
+    const incident = await this.prisma.incident.create({ data: { ...dto, createdById: userId } });
     if (incident.severity === "SEV1") {
       this.notifications.notifyBestEffort(`🚨 New SEV1 incident: "${incident.title}" (ID: ${incident.id})`);
     }

@@ -10,8 +10,8 @@ export class MonitoringService {
     private readonly aiService: AiService,
   ) {}
 
-  create(dto: CreateMetricDto) {
-    return this.prisma.metric.create({ data: dto });
+  create(dto: CreateMetricDto, userId: string) {
+    return this.prisma.metric.create({ data: { ...dto, createdById: userId } });
   }
 
   findAll() {

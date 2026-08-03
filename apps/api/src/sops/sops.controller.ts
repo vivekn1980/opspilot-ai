@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { SopsService } from "./sops.service";
 import { GenerateSopDto } from "./dto/generate-sop.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("sops")
 export class SopsController {
@@ -17,7 +18,7 @@ export class SopsController {
   }
 
   @Post("generate")
-  generate(@Body() dto: GenerateSopDto) {
-    return this.sopsService.generate(dto.incidentId);
+  generate(@Body() dto: GenerateSopDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.sopsService.generate(dto.incidentId, user.id);
   }
 }

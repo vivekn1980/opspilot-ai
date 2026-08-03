@@ -27,7 +27,7 @@ export class ServiceReviewReportsService {
   // from the same shared incident data as Executive Reports — accountName is
   // a label for framing the report, not a real per-account filter. A true
   // per-account MSP view needs tenant-scoped incidents (see docs/ARCHITECTURE.md).
-  async generate(accountName: string, periodStart: string, periodEnd: string) {
+  async generate(accountName: string, periodStart: string, periodEnd: string, userId: string) {
     const start = new Date(periodStart);
     const end = new Date(periodEnd);
 
@@ -49,7 +49,7 @@ export class ServiceReviewReportsService {
     });
 
     return this.prisma.serviceReviewReport.create({
-      data: { accountName, content, periodStart: start, periodEnd: end },
+      data: { accountName, content, periodStart: start, periodEnd: end, createdById: userId },
     });
   }
 }

@@ -7,8 +7,8 @@ import { UpdateProblemDto } from "./dto/update-problem.dto";
 export class ProblemsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(dto: CreateProblemDto) {
-    return this.prisma.problem.create({ data: dto });
+  create(dto: CreateProblemDto, userId: string) {
+    return this.prisma.problem.create({ data: { ...dto, createdById: userId } });
   }
 
   findAll() {

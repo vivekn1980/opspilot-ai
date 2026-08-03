@@ -22,6 +22,7 @@ model Incident {
   // Set once an SLA-breach alert has been sent, so the periodic sweep in
   // NotificationsService never re-notifies for the same incident.
   slaBreachNotifiedAt DateTime?
+  createdById         String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 }
@@ -32,6 +33,7 @@ model Problem {
   description String
   status      String   @default("OPEN") // OPEN, IDENTIFIED, RESOLVED
   rootCause   String?
+  createdById String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -43,6 +45,7 @@ model Change {
   riskLevel   String    @default("MEDIUM") // LOW, MEDIUM, HIGH
   status      String    @default("PROPOSED") // PROPOSED, APPROVED, SCHEDULED, COMPLETED, CANCELLED
   scheduledAt DateTime?
+  createdById String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -53,6 +56,7 @@ model Sop {
   title            String
   content          String
   sourceIncidentId String?
+  createdById      String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
@@ -61,11 +65,12 @@ model Sop {
 // Retrieval is lexical (keyword overlap) for the MVP, not vector search —
 // see docs/ARCHITECTURE.md's "AI & RAG Pipeline" for the target design.
 model Doc {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ShiftHandover {
@@ -73,6 +78,7 @@ model ShiftHandover {
   summary     String
   periodStart DateTime
   periodEnd   DateTime
+  createdById String?
   createdAt   DateTime @default(now())
 }
 
@@ -80,10 +86,11 @@ model ShiftHandover {
 // over its lifecycle (opened, investigating, resolved), so this is a log,
 // not a single field on Incident.
 model CustomerUpdate {
-  id         String   @id @default(cuid())
-  incidentId String
-  content    String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  incidentId  String
+  content     String
+  createdById String?
+  createdAt   DateTime @default(now())
 }
 
 model Risk {
@@ -94,6 +101,7 @@ model Risk {
   impact      String   @default("MEDIUM") // LOW, MEDIUM, HIGH
   status      String   @default("OPEN") // OPEN, MITIGATING, ACCEPTED, CLOSED
   mitigation  String?
+  createdById String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -102,11 +110,12 @@ model Risk {
 // narrative is the forecast/anomaly explanation, not a modeled prediction —
 // there's no real metrics pipeline behind this in the MVP.
 model CapacityReport {
-  id         String   @id @default(cuid())
-  metricName String
-  rawData    String
-  narrative  String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  metricName  String
+  rawData     String
+  narrative   String
+  createdById String?
+  createdAt   DateTime @default(now())
 }
 
 // Steps and step results are stored as JSON strings (SQLite has no native
@@ -116,6 +125,7 @@ model Runbook {
   title       String
   description String
   steps       String // JSON: RunbookStep[]
+  createdById String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -125,6 +135,7 @@ model RunbookRun {
   runbookId   String
   status      String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
   stepResults String // JSON: RunbookStepResult[]
+  createdById String?
   startedAt   DateTime  @default(now())
   completedAt DateTime?
 }
@@ -134,6 +145,7 @@ model ExecutiveReport {
   content     String
   periodStart DateTime
   periodEnd   DateTime
+  createdById String?
   createdAt   DateTime @default(now())
 }
 
@@ -143,6 +155,7 @@ model ServiceReviewReport {
   content     String
   periodStart DateTime
   periodEnd   DateTime
+  createdById String?
   createdAt   DateTime @default(now())
 }
 
@@ -176,9 +189,21 @@ model AiUsageLog {
 // no live metrics ingest pipeline in the MVP (see docs/ARCHITECTURE.md's
 // integration hub for the target Datadog/Prometheus/CloudWatch connectors).
 model Metric {
-  id        String   @id @default(cuid())
-  name      String
-  rawData   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  rawData     String
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Individual accounts. No roles/tiers in this MVP — every authenticated
+// user has full access; createdById fields elsewhere are for attribution
+// ("who did this"), not for access control.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
 }

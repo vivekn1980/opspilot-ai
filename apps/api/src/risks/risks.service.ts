@@ -11,8 +11,8 @@ export class RisksService {
     private readonly aiService: AiService,
   ) {}
 
-  create(dto: CreateRiskDto) {
-    return this.prisma.risk.create({ data: dto });
+  create(dto: CreateRiskDto, userId: string) {
+    return this.prisma.risk.create({ data: { ...dto, createdById: userId } });
   }
 
   findAll() {

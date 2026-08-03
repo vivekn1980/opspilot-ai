@@ -23,7 +23,7 @@ export class ExecutiveReportsService {
     return report;
   }
 
-  async generate(periodStart: string, periodEnd: string) {
+  async generate(periodStart: string, periodEnd: string, userId: string) {
     const start = new Date(periodStart);
     const end = new Date(periodEnd);
 
@@ -47,7 +47,7 @@ export class ExecutiveReportsService {
     });
 
     return this.prisma.executiveReport.create({
-      data: { content, periodStart: start, periodEnd: end },
+      data: { content, periodStart: start, periodEnd: end, createdById: userId },
     });
   }
 }

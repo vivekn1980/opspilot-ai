@@ -21,7 +21,7 @@ export class ShiftHandoversService {
     return handover;
   }
 
-  async generate(periodStart: string, periodEnd: string) {
+  async generate(periodStart: string, periodEnd: string, userId: string) {
     const start = new Date(periodStart);
     const end = new Date(periodEnd);
 
@@ -42,7 +42,7 @@ export class ShiftHandoversService {
     });
 
     return this.prisma.shiftHandover.create({
-      data: { summary, periodStart: start, periodEnd: end },
+      data: { summary, periodStart: start, periodEnd: end, createdById: userId },
     });
   }
 }

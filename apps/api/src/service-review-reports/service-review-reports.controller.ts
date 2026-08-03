@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ServiceReviewReportsService } from "./service-review-reports.service";
 import { GenerateServiceReviewReportDto } from "./dto/generate-service-review-report.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("service-review-reports")
 export class ServiceReviewReportsController {
@@ -17,7 +18,7 @@ export class ServiceReviewReportsController {
   }
 
   @Post("generate")
-  generate(@Body() dto: GenerateServiceReviewReportDto) {
-    return this.serviceReviewReportsService.generate(dto.accountName, dto.periodStart, dto.periodEnd);
+  generate(@Body() dto: GenerateServiceReviewReportDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.serviceReviewReportsService.generate(dto.accountName, dto.periodStart, dto.periodEnd, user.id);
   }
 }

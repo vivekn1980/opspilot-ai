@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/commo
 import { IncidentsService } from "./incidents.service";
 import { CreateIncidentDto } from "./dto/create-incident.dto";
 import { UpdateIncidentDto } from "./dto/update-incident.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("incidents")
 export class IncidentsController {
   constructor(private readonly incidentsService: IncidentsService) {}
 
   @Post()
-  create(@Body() dto: CreateIncidentDto) {
-    return this.incidentsService.create(dto);
+  create(@Body() dto: CreateIncidentDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.incidentsService.create(dto, user.id);
   }
 
   @Get()

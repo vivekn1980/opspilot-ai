@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/commo
 import { RisksService } from "./risks.service";
 import { CreateRiskDto } from "./dto/create-risk.dto";
 import { UpdateRiskDto } from "./dto/update-risk.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("risks")
 export class RisksController {
   constructor(private readonly risksService: RisksService) {}
 
   @Post()
-  create(@Body() dto: CreateRiskDto) {
-    return this.risksService.create(dto);
+  create(@Body() dto: CreateRiskDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.risksService.create(dto, user.id);
   }
 
   @Get()

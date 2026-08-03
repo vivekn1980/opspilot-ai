@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ShiftHandoversService } from "./shift-handovers.service";
 import { GenerateShiftHandoverDto } from "./dto/generate-shift-handover.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("shift-handovers")
 export class ShiftHandoversController {
@@ -17,7 +18,7 @@ export class ShiftHandoversController {
   }
 
   @Post("generate")
-  generate(@Body() dto: GenerateShiftHandoverDto) {
-    return this.shiftHandoversService.generate(dto.periodStart, dto.periodEnd);
+  generate(@Body() dto: GenerateShiftHandoverDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.shiftHandoversService.generate(dto.periodStart, dto.periodEnd, user.id);
   }
 }

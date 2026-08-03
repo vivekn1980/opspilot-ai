@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { DocsService } from "./docs.service";
 import { CreateDocDto } from "./dto/create-doc.dto";
 import { ChatDto } from "./dto/chat.dto";
+import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 @Controller("docs")
 export class DocsController {
   constructor(private readonly docsService: DocsService) {}
 
   @Post()
-  create(@Body() dto: CreateDocDto) {
-    return this.docsService.create(dto);
+  create(@Body() dto: CreateDocDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.docsService.create(dto, user.id);
   }
 
   @Get()
