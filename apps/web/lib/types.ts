@@ -177,3 +177,12 @@ export interface MonitoringAskResult {
   answer: string;
   sources: { id: string; name: string }[];
 }
+
+export interface NotificationStatus {
+  configured: boolean;
+}
+
+export interface AlertResult {
+  sent: boolean;
+  reason?: string;
+}

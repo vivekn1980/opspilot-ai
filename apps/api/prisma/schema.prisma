@@ -11,16 +11,19 @@ datasource db {
 // application layer (see src/incidents/constants.ts) rather than the DB layer.
 // Swapping datasource to Postgres later can promote these back to real enums.
 model Incident {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  severity    String   @default("SEV3")
-  status      String   @default("OPEN")
-  rawLogs     String?
-  logAnalysis String?
-  rcaReport   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  title               String
+  description         String
+  severity            String    @default("SEV3")
+  status              String    @default("OPEN")
+  rawLogs             String?
+  logAnalysis         String?
+  rcaReport           String?
+  // Set once an SLA-breach alert has been sent, so the periodic sweep in
+  // NotificationsService never re-notifies for the same incident.
+  slaBreachNotifiedAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model Problem {

@@ -9,8 +9,10 @@ import {
   ExecutiveReport,
   Incident,
   KpiSummary,
+  AlertResult,
   Metric,
   MonitoringAskResult,
+  NotificationStatus,
   Problem,
   Risk,
   Runbook,
@@ -166,6 +168,10 @@ export const api = {
     request<Metric>("/metrics", { method: "POST", body: JSON.stringify(data) }),
   askMonitoring: (question: string) =>
     request<MonitoringAskResult>("/metrics/ask", { method: "POST", body: JSON.stringify({ question }) }),
+
+  // Notifications
+  getNotificationStatus: () => request<NotificationStatus>("/notifications/status"),
+  sendTestAlert: () => request<AlertResult>("/notifications/test", { method: "POST" }),
 
   // Settings
   getSettings: () => request<AppSettings>("/settings"),

@@ -1,14 +1,22 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateIncidentDto } from "./dto/create-incident.dto";
 import { UpdateIncidentDto } from "./dto/update-incident.dto";
 
 @Injectable()
 export class IncidentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
-  create(dto: CreateIncidentDto) {
-    return this.prisma.incident.create({ data: dto });
+  async create(dto: CreateIncidentDto) {
+    const incident = await this.prisma.incident.create({ data: dto });
+    if (incident.severity === "SEV1") {
+      this.notifications.notifyBestEffort(`🚨 New SEV1 incident: "${incident.title}" (ID: ${incident.id})`);
+    }
+    return incident;
   }
 
   findAll() {
