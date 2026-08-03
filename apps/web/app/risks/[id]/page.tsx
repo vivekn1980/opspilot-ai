@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Risk, RiskStatus } from "@/lib/types";
 import AiOutput from "@/components/ai-output";
+import PendingHint from "@/components/pending-hint";
 
 export default function RiskDetailPage() {
   const params = useParams<{ id: string }>();
@@ -81,6 +82,7 @@ export default function RiskDetailPage() {
           {generating ? "Drafting…" : "Generate Mitigation"}
         </button>
       </div>
+      <PendingHint active={generating} />
       {risk.mitigation ? (
         <AiOutput content={risk.mitigation} />
       ) : (

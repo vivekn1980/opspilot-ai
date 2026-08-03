@@ -560,3 +560,10 @@ h2 {
   color: var(--text-muted);
   white-space: nowrap;
 }
+
+.pending-hint {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin: 0.5rem 0 0;
+  font-variant-numeric: tabular-nums;
+}

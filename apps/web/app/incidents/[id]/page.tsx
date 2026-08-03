@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { CustomerUpdate, Incident, IncidentStatus } from "@/lib/types";
 import AiOutput from "@/components/ai-output";
+import PendingHint from "@/components/pending-hint";
 
 export default function IncidentDetailPage() {
   const params = useParams<{ id: string }>();
@@ -128,6 +129,7 @@ export default function IncidentDetailPage() {
           {analyzing ? "Analyzing…" : "Analyze Logs"}
         </button>
       </div>
+      <PendingHint active={analyzing} />
 
       <h2>AI Log Analysis</h2>
       {incident.logAnalysis ? (
@@ -142,6 +144,7 @@ export default function IncidentDetailPage() {
           {generatingRca ? "Generating…" : "Generate RCA"}
         </button>
       </div>
+      <PendingHint active={generatingRca} />
       {incident.rcaReport ? (
         <AiOutput content={incident.rcaReport} />
       ) : (
@@ -157,6 +160,7 @@ export default function IncidentDetailPage() {
           {generatingUpdate ? "Drafting…" : "Generate Update"}
         </button>
       </div>
+      <PendingHint active={generatingUpdate} />
       {!customerUpdates || customerUpdates.length === 0 ? (
         <p className="empty">No customer updates drafted yet.</p>
       ) : (

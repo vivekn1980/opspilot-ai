@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { ServiceReviewReport } from "@/lib/types";
+import PendingHint from "@/components/pending-hint";
 
 function defaultRange() {
   const end = new Date();
@@ -96,6 +97,7 @@ export default function ServiceReviewReportsPage() {
             </button>
           </div>
         </form>
+        <PendingHint active={generating} />
       </div>
 
       {error && <p className="error">{error}</p>}

@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { api } from "@/lib/api";
 import { ChatResult, Doc } from "@/lib/types";
 import AiOutput from "@/components/ai-output";
+import PendingHint from "@/components/pending-hint";
 
 export default function DocsPage() {
   const [docs, setDocs] = useState<Doc[] | null>(null);
@@ -84,6 +85,7 @@ export default function DocsPage() {
             </button>
           </div>
         </form>
+        <PendingHint active={asking} />
         {chatResult && (
           <div style={{ marginTop: "1rem" }}>
             <AiOutput content={chatResult.answer} />

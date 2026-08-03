@@ -1,11 +1,22 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, RequestTimeoutException } from "@nestjs/common";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import { AiProvider } from "../settings/constants";
 import { SettingsService } from "../settings/settings.service";
 
 const ANTHROPIC_MODEL = "claude-opus-5";
 const KIMI_MODEL = "moonshotai/kimi-k3-free";
 const KIMI_BASE_URL = "https://api.tokenrouter.com/v1";
+
+// Free-tier Kimi completions have been observed taking 90s+ for larger
+// outputs (log analysis, RCA). This is a safety net against a truly dead
+// upstream, not a tight budget — set well above observed normal latency.
+const AI_REQUEST_TIMEOUT_MS = 150_000;
+
+const PROVIDER_LABEL: Record<AiProvider, string> = {
+  KIMI: "Kimi K3",
+  ANTHROPIC: "Anthropic Claude",
+};
 
 interface CompleteParams {
   system: string;
@@ -15,20 +26,43 @@ interface CompleteParams {
 
 @Injectable()
 export class AiService {
-  private readonly anthropicClient = new Anthropic();
+  // maxRetries: 0 — the SDK default (2) retries on timeout too, which turns
+  // a "150s ceiling" into a silent "up to 450s" wait. A clean, predictable
+  // timeout beats an automatic retry here: if it's genuinely slow, retrying
+  // won't make it faster, and the user can just click the button again.
+  private readonly anthropicClient = new Anthropic({ timeout: AI_REQUEST_TIMEOUT_MS, maxRetries: 0 });
   // A non-empty placeholder means the client never throws at construction
   // time if the key is unset — the real error surfaces as a normal 401 on
   // the first request, same UX as the Anthropic client with no API key.
   private readonly kimiClient = new OpenAI({
     apiKey: process.env.TOKENROUTER_API_KEY || "missing-tokenrouter-api-key",
     baseURL: KIMI_BASE_URL,
+    timeout: AI_REQUEST_TIMEOUT_MS,
+    maxRetries: 0,
   });
 
   constructor(private readonly settingsService: SettingsService) {}
 
+  private isTimeoutError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return /timed?\s?out/i.test(message);
+  }
+
   private async complete(params: CompleteParams): Promise<string> {
     const provider = await this.settingsService.getAiProvider();
-    return provider === "ANTHROPIC" ? this.completeWithAnthropic(params) : this.completeWithKimi(params);
+    try {
+      return provider === "ANTHROPIC"
+        ? await this.completeWithAnthropic(params)
+        : await this.completeWithKimi(params);
+    } catch (error) {
+      if (this.isTimeoutError(error)) {
+        throw new RequestTimeoutException(
+          `${PROVIDER_LABEL[provider]} didn't respond within ${AI_REQUEST_TIMEOUT_MS / 1000}s. ` +
+            "Try again, or switch providers in Settings.",
+        );
+      }
+      throw error;
+    }
   }
 
   private async completeWithAnthropic(params: CompleteParams): Promise<string> {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Incident, Sop } from "@/lib/types";
+import PendingHint from "@/components/pending-hint";
 
 export default function SopsPage() {
   const [sops, setSops] = useState<Sop[] | null>(null);
@@ -75,6 +76,7 @@ export default function SopsPage() {
             </button>
           </div>
         )}
+        <PendingHint active={generating} />
       </div>
 
       {error && <p className="error">{error}</p>}

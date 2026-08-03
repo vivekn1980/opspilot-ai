@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { CapacityReport } from "@/lib/types";
+import PendingHint from "@/components/pending-hint";
 
 export default function CapacityPage() {
   const [reports, setReports] = useState<CapacityReport[] | null>(null);
@@ -76,6 +77,7 @@ export default function CapacityPage() {
             </button>
           </div>
         </form>
+        <PendingHint active={generating} />
       </div>
 
       {error && <p className="error">{error}</p>}
