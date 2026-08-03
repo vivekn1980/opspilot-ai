@@ -11,7 +11,8 @@
     "build:api": "npm run build --workspace apps/api",
     "build:web": "npm run build --workspace apps/web",
     "typecheck:api": "npm run typecheck --workspace apps/api",
-    "typecheck:web": "npm run typecheck --workspace apps/web"
+    "typecheck:web": "npm run typecheck --workspace apps/web",
+    "test:api": "npm run test --workspace apps/api"
   },
   "allowScripts": {
     "@nestjs/core@10.4.22": true,
