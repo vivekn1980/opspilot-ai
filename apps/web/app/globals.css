@@ -133,7 +133,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -142,6 +143,11 @@ a {
 
 .incident-row:hover {
   border-color: var(--accent-2);
+}
+
+.incident-row > *:first-child {
+  min-width: 0;
+  flex: 1 1 220px;
 }
 
 .incident-title {
@@ -566,4 +572,36 @@ h2 {
   font-size: 0.82rem;
   margin: 0.5rem 0 0;
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .brand-logo {
+    height: 34px;
+  }
+
+  .nav-link {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.55rem;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  .card {
+    padding: 0.9rem 1rem;
+  }
+
+  .ai-output {
+    padding: 0.9rem 1rem;
+    max-height: none;
+  }
+
+  form {
+    max-width: none;
+  }
 }
