@@ -186,3 +186,11 @@ export interface AlertResult {
   sent: boolean;
   reason?: string;
 }
+
+export interface SearchResult {
+  type: string;
+  id: string;
+  title: string;
+  meta: string;
+  href: string;
+}

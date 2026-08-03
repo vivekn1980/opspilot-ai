@@ -567,6 +567,82 @@ h2 {
   white-space: nowrap;
 }
 
+.global-search {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 360px;
+}
+
+.global-search input {
+  width: 100%;
+}
+
+.global-search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  max-height: 22rem;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.global-search-empty {
+  padding: 0.85rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.global-search-result {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.global-search-result:last-child {
+  border-bottom: none;
+}
+
+.global-search-result:hover {
+  background: var(--surface-2);
+}
+
+.global-search-result-type {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.global-search-result-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-search-result-meta {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .pending-hint {
   color: var(--text-muted);
   font-size: 0.82rem;

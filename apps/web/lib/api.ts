@@ -14,6 +14,7 @@ import {
   MonitoringAskResult,
   NotificationStatus,
   Problem,
+  SearchResult,
   Risk,
   Runbook,
   RunbookRun,
@@ -168,6 +169,9 @@ export const api = {
     request<Metric>("/metrics", { method: "POST", body: JSON.stringify(data) }),
   askMonitoring: (question: string) =>
     request<MonitoringAskResult>("/metrics/ask", { method: "POST", body: JSON.stringify({ question }) }),
+
+  // Global search
+  search: (q: string) => request<{ results: SearchResult[] }>(`/search?q=${encodeURIComponent(q)}`),
 
   // Notifications
   getNotificationStatus: () => request<NotificationStatus>("/notifications/status"),

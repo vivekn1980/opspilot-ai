@@ -16,6 +16,7 @@ import { ServiceReviewReportsModule } from "./service-review-reports/service-rev
 import { SettingsModule } from "./settings/settings.module";
 import { MonitoringModule } from "./monitoring/monitoring.module";
 import { NotificationsModule } from "./notifications/notifications.module";
+import { SearchModule } from "./search/search.module";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
     ServiceReviewReportsModule,
     MonitoringModule,
     NotificationsModule,
+    SearchModule,
   ],
 })
 export class AppModule {}
