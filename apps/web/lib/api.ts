@@ -8,6 +8,7 @@ import {
   Doc,
   ExecutiveReport,
   Incident,
+  IntegrationStatus,
   Invite,
   KpiSummary,
   AiUsageLogEntry,
@@ -214,4 +215,7 @@ export const api = {
   getSettings: () => request<AppSettings>("/settings"),
   updateSettings: (aiProvider: AiProvider) =>
     request<AppSettings>("/settings", { method: "PUT", body: JSON.stringify({ aiProvider }) }),
+
+  // Integrations status overview
+  getIntegrationsStatus: () => request<{ integrations: IntegrationStatus[] }>("/integrations/status"),
 };

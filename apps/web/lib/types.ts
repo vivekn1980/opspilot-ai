@@ -216,6 +216,12 @@ export interface NotificationStatus {
   configured: boolean;
 }
 
+export interface IntegrationStatus {
+  key: string;
+  name: string;
+  configured: boolean;
+}
+
 export interface AlertResult {
   sent: boolean;
   reason?: string;

@@ -24,6 +24,7 @@ import { MonitoringModule } from "./monitoring/monitoring.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { SearchModule } from "./search/search.module";
 import { AiUsageModule } from "./ai-usage/ai-usage.module";
+import { IntegrationsModule } from "./integrations/integrations.module";
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { AiUsageModule } from "./ai-usage/ai-usage.module";
     AiUsageModule,
     UsersModule,
     InvitesModule,
+    IntegrationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

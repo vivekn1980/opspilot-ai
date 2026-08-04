@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { AiProvider } from "@/lib/types";
+import { AiProvider, IntegrationStatus } from "@/lib/types";
 
 const PROVIDER_INFO: Record<AiProvider, { label: string; model: string; note: string }> = {
   KIMI: {
@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [notifConfigured, setNotifConfigured] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [integrations, setIntegrations] = useState<IntegrationStatus[] | null>(null);
 
   useEffect(() => {
     api
@@ -34,6 +35,10 @@ export default function SettingsPage() {
       .getNotificationStatus()
       .then((s) => setNotifConfigured(s.configured))
       .catch(() => setNotifConfigured(false));
+    api
+      .getIntegrationsStatus()
+      .then((s) => setIntegrations(s.integrations))
+      .catch((e) => setError(String(e.message ?? e)));
   }, []);
 
   async function onTestAlert() {
@@ -75,6 +80,32 @@ export default function SettingsPage() {
       </div>
 
       {error && <p className="error">{error}</p>}
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Integrations</h2>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.88rem" }}>
+          At-a-glance status for every external system OpsPilot can connect to. "Configured" means the
+          relevant keys are set in <code>apps/api/.env</code> — not that a connection has been tested.
+        </p>
+        {!integrations && <p className="empty">Loading…</p>}
+        {integrations && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.5rem" }}>
+            {integrations.map((integration) => (
+              <div
+                key={integration.key}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+              >
+                <span>{integration.name}</span>
+                <span className="pill">
+                  <span className={`dot ${integration.configured ? "dot-good" : "dot-muted"}`} />
+                  {integration.configured ? "Configured" : "Not configured"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {!aiProvider && !error && <p className="empty">Loading…</p>}
 
       {aiProvider && (
