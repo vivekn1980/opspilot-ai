@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 
 @Injectable()
 export class ShiftHandoversService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
   ) {}
 
@@ -41,8 +41,10 @@ export class ShiftHandoversService {
       })),
     });
 
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
     return this.prisma.shiftHandover.create({
-      data: { summary, periodStart: start, periodEnd: end, createdById: userId },
+      data: { organizationId: "", summary, periodStart: start, periodEnd: end, createdById: userId },
     });
   }
 }

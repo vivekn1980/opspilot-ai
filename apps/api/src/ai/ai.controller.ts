@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { IsOptional, IsString } from "class-validator";
 import { AiService } from "./ai.service";
 import { IncidentsService } from "../incidents/incidents.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { CurrentUser, CurrentUserPayload } from "../auth/current-user.decorator";
 
 class AnalyzeLogsDto {
@@ -16,7 +16,7 @@ export class AiController {
   constructor(
     private readonly aiService: AiService,
     private readonly incidentsService: IncidentsService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
   ) {}
 
   @Post("analyze-logs")
@@ -63,6 +63,10 @@ export class AiController {
       status: incident.status,
       priorUpdates: priorUpdates.map((u) => u.content),
     });
-    return this.prisma.customerUpdate.create({ data: { incidentId: id, content, createdById: user.id } });
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
+    return this.prisma.customerUpdate.create({
+      data: { organizationId: "", incidentId: id, content, createdById: user.id },
+    });
   }
 }

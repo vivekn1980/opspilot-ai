@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 import { IncidentsService } from "../incidents/incidents.service";
 
 @Injectable()
 export class SopsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
     private readonly incidentsService: IncidentsService,
   ) {}
@@ -31,8 +31,11 @@ export class SopsService {
       logAnalysis: incident.logAnalysis,
       rcaReport: incident.rcaReport,
     });
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
     return this.prisma.sop.create({
       data: {
+        organizationId: "",
         title: `SOP: ${incident.title}`,
         content,
         sourceIncidentId: incident.id,

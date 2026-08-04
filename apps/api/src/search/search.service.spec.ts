@@ -1,5 +1,5 @@
 import { SearchService } from "./search.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 
 function makeService(overrides: Partial<Record<string, unknown[]>> = {}) {
   const empty = () => ({ findMany: jest.fn().mockResolvedValue([]) });
@@ -16,7 +16,7 @@ function makeService(overrides: Partial<Record<string, unknown[]>> = {}) {
   for (const [model, rows] of Object.entries(overrides)) {
     prisma[model].findMany = jest.fn().mockResolvedValue(rows);
   }
-  return new SearchService(prisma as unknown as PrismaService);
+  return new SearchService(prisma as unknown as TenantPrismaService);
 }
 
 describe("SearchService.search", () => {

@@ -1,17 +1,19 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 import { CreateMetricDto } from "./dto/create-metric.dto";
 
 @Injectable()
 export class MonitoringService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
   ) {}
 
   create(dto: CreateMetricDto, userId: string) {
-    return this.prisma.metric.create({ data: { ...dto, createdById: userId } });
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
+    return this.prisma.metric.create({ data: { organizationId: "", ...dto, createdById: userId } });
   }
 
   findAll() {

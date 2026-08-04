@@ -3,12 +3,15 @@ import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 
-function makeService(overrides: { userCount?: number; existingUser?: any } = {}) {
+function makeService(overrides: { existingUser?: any } = {}) {
   const prisma = {
     user: {
-      count: jest.fn().mockResolvedValue(overrides.userCount ?? 0),
       findUnique: jest.fn().mockResolvedValue(overrides.existingUser ?? null),
-      create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: "new-id", ...data })),
+      create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: "new-user-id", ...data })),
+    },
+    organization: {
+      create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: "new-org-id", ...data })),
+      findUniqueOrThrow: jest.fn().mockResolvedValue({ id: "org-1", name: "Existing Org" }),
     },
   };
   const jwt = { sign: jest.fn().mockReturnValue("signed-token") };
@@ -17,23 +20,23 @@ function makeService(overrides: { userCount?: number; existingUser?: any } = {})
 }
 
 describe("AuthService.register", () => {
-  it("makes the very first registered user an ADMIN", async () => {
-    const { service, prisma } = makeService({ userCount: 0 });
+  it("creates a new organization and makes the registering user its ADMIN", async () => {
+    const { service, prisma } = makeService();
 
-    await service.register({ email: "first@x.com", password: "password123", name: "First" });
+    await service.register({
+      email: "founder@x.com",
+      password: "password123",
+      name: "Founder",
+      organizationName: "Acme Corp",
+    });
 
-    expect(prisma.user.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ role: "ADMIN" }) }),
+    expect(prisma.organization.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { name: "Acme Corp" } }),
     );
-  });
-
-  it("makes every subsequent registration a VIEWER by default", async () => {
-    const { service, prisma } = makeService({ userCount: 3 });
-
-    await service.register({ email: "later@x.com", password: "password123", name: "Later" });
-
     expect(prisma.user.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ role: "VIEWER" }) }),
+      expect.objectContaining({
+        data: expect.objectContaining({ role: "ADMIN", organizationId: "new-org-id" }),
+      }),
     );
   });
 
@@ -41,7 +44,7 @@ describe("AuthService.register", () => {
     const { service } = makeService({ existingUser: { id: "x", email: "dup@x.com" } });
 
     await expect(
-      service.register({ email: "dup@x.com", password: "password123", name: "Dup" }),
+      service.register({ email: "dup@x.com", password: "password123", name: "Dup", organizationName: "Dup Co" }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });

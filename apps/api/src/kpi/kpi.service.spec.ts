@@ -1,5 +1,5 @@
 import { KpiService } from "./kpi.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 
 function incident(overrides: Partial<Record<string, unknown>> = {}) {
   return {
@@ -19,7 +19,7 @@ function hoursAgo(hours: number): Date {
 describe("KpiService.getSummary", () => {
   function makeService(incidents: unknown[]) {
     const prisma = { incident: { findMany: jest.fn().mockResolvedValue(incidents) } };
-    return new KpiService(prisma as unknown as PrismaService);
+    return new KpiService(prisma as unknown as TenantPrismaService);
   }
 
   it("counts incidents by severity and status", async () => {

@@ -10,9 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Local dev only — the DB is never actually connected to during
-      # `prisma generate` / typecheck / build, just needs to resolve.
-      DATABASE_URL: "file:./ci.db"
+      # Never actually connected to — prisma generate/typecheck/build/test
+      # (all mocked) don't touch a real database, this just needs to parse
+      # as a valid postgresql:// URL for the datasource provider.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
 
     steps:
       - uses: actions/checkout@v4

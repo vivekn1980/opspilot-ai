@@ -1,10 +1,17 @@
 export type Role = "ADMIN" | "VIEWER";
 
+export interface Organization {
+  id: string;
+  name: string;
+}
+
 export interface User {
   id: string;
   email: string;
   name: string;
   role: Role;
+  organizationId: string;
+  organization: Organization;
 }
 
 export interface ManagedUser {

@@ -1,5 +1,5 @@
 import { AiUsageService } from "./ai-usage.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 
 function log(overrides: Partial<Record<string, unknown>> = {}) {
   return {
@@ -18,7 +18,7 @@ function log(overrides: Partial<Record<string, unknown>> = {}) {
 
 function makeService(logs: unknown[]) {
   const prisma = { aiUsageLog: { findMany: jest.fn().mockResolvedValue(logs), create: jest.fn() } };
-  return new AiUsageService(prisma as unknown as PrismaService);
+  return new AiUsageService(prisma as unknown as TenantPrismaService);
 }
 
 describe("AiUsageService.getSummary", () => {

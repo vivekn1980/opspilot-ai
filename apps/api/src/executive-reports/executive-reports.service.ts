@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 import { KpiService } from "../kpi/kpi.service";
 
 @Injectable()
 export class ExecutiveReportsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
     private readonly kpiService: KpiService,
   ) {}
@@ -46,8 +46,10 @@ export class ExecutiveReportsService {
       changes: changes.map((c) => ({ title: c.title, status: c.status, riskLevel: c.riskLevel })),
     });
 
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
     return this.prisma.executiveReport.create({
-      data: { content, periodStart: start, periodEnd: end, createdById: userId },
+      data: { organizationId: "", content, periodStart: start, periodEnd: end, createdById: userId },
     });
   }
 }

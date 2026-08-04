@@ -3,15 +3,25 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// SQLite has no native enum type, so severity/status are validated at the
-// application layer (see src/incidents/constants.ts) rather than the DB layer.
-// Swapping datasource to Postgres later can promote these back to real enums.
+// Every content model below carries organizationId for tenant isolation.
+// It's enforced automatically by a Prisma Client Extension (see
+// src/prisma/tenant-scoping.extension.ts) that injects organizationId into
+// every query's where/data — not literal Postgres row-level security
+// (session-variable policies), which would require restructuring every
+// service to run inside a per-request transaction. The application-layer
+// extension gives the same real guarantee — one org can never read or
+// write another's rows — without that invasive rewrite.
+//
+// Status/severity/role fields remain plain Strings validated at the app
+// layer (see e.g. src/incidents/constants.ts) — a carryover from the
+// SQLite-era design, not something this migration needed to change.
 model Incident {
   id                  String    @id @default(cuid())
+  organizationId      String
   title               String
   description         String
   severity            String    @default("SEV3")
@@ -25,146 +35,191 @@ model Incident {
   createdById         String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+
+  @@index([organizationId])
 }
 
 model Problem {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  status      String   @default("OPEN") // OPEN, IDENTIFIED, RESOLVED
-  rootCause   String?
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  description    String
+  status         String   @default("OPEN") // OPEN, IDENTIFIED, RESOLVED
+  rootCause      String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model Change {
-  id          String    @id @default(cuid())
-  title       String
-  description String
-  riskLevel   String    @default("MEDIUM") // LOW, MEDIUM, HIGH
-  status      String    @default("PROPOSED") // PROPOSED, APPROVED, SCHEDULED, COMPLETED, CANCELLED
-  scheduledAt DateTime?
-  createdById String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  organizationId String
+  title          String
+  description    String
+  riskLevel      String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status         String    @default("PROPOSED") // PROPOSED, APPROVED, SCHEDULED, COMPLETED, CANCELLED
+  scheduledAt    DateTime?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId])
 }
 
 // AI-drafted from a resolved incident's RCA / log analysis.
 model Sop {
   id               String   @id @default(cuid())
+  organizationId   String
   title            String
   content          String
   sourceIncidentId String?
   createdById      String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 // Runbooks/wiki text the AI Chat with Documentation feature retrieves from.
 // Retrieval is lexical (keyword overlap) for the MVP, not vector search —
 // see docs/ARCHITECTURE.md's "AI & RAG Pipeline" for the target design.
 model Doc {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  content        String
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model ShiftHandover {
-  id          String   @id @default(cuid())
-  summary     String
-  periodStart DateTime
-  periodEnd   DateTime
-  createdById String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  summary        String
+  periodStart    DateTime
+  periodEnd      DateTime
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }
 
 // AI-drafted, customer-facing status update. An incident can have several
 // over its lifecycle (opened, investigating, resolved), so this is a log,
 // not a single field on Incident.
 model CustomerUpdate {
-  id          String   @id @default(cuid())
-  incidentId  String
-  content     String
-  createdById String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  incidentId     String
+  content        String
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }
 
 model Risk {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  likelihood  String   @default("MEDIUM") // LOW, MEDIUM, HIGH
-  impact      String   @default("MEDIUM") // LOW, MEDIUM, HIGH
-  status      String   @default("OPEN") // OPEN, MITIGATING, ACCEPTED, CLOSED
-  mitigation  String?
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  description    String
+  likelihood     String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  impact         String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status         String   @default("OPEN") // OPEN, MITIGATING, ACCEPTED, CLOSED
+  mitigation     String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 // User pastes a raw metric time series (e.g. "date,value" lines); the AI
 // narrative is the forecast/anomaly explanation, not a modeled prediction —
 // there's no real metrics pipeline behind this in the MVP.
 model CapacityReport {
-  id          String   @id @default(cuid())
-  metricName  String
-  rawData     String
-  narrative   String
-  createdById String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  metricName     String
+  rawData        String
+  narrative      String
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }
 
-// Steps and step results are stored as JSON strings (SQLite has no native
-// JSON/array column) — see RunbookStep / RunbookStepResult types in the API.
+// Steps and step results are stored as JSON strings — a carryover from the
+// SQLite-era design (no native JSON/array column there); Postgres does have
+// a native Json type but changing this wasn't in scope of the tenancy
+// migration. See RunbookStep / RunbookStepResult types in the API.
 model Runbook {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  steps       String // JSON: RunbookStep[]
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  description    String
+  steps          String // JSON: RunbookStep[]
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model RunbookRun {
-  id          String    @id @default(cuid())
-  runbookId   String
-  status      String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
-  stepResults String // JSON: RunbookStepResult[]
-  createdById String?
-  startedAt   DateTime  @default(now())
-  completedAt DateTime?
+  id             String    @id @default(cuid())
+  organizationId String
+  runbookId      String
+  status         String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
+  stepResults    String // JSON: RunbookStepResult[]
+  createdById    String?
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  @@index([organizationId])
 }
 
 model ExecutiveReport {
-  id          String   @id @default(cuid())
-  content     String
-  periodStart DateTime
-  periodEnd   DateTime
-  createdById String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  content        String
+  periodStart    DateTime
+  periodEnd      DateTime
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }
 
 model ServiceReviewReport {
-  id          String   @id @default(cuid())
-  accountName String
-  content     String
-  periodStart DateTime
-  periodEnd   DateTime
-  createdById String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  accountName    String
+  content        String
+  periodStart    DateTime
+  periodEnd      DateTime
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }
 
-// Generic key-value app settings — currently just which LLM provider
-// AiService routes through. Single row per key, no per-user scoping
-// (the app has no auth/multi-tenancy yet).
+// Per-organization app settings — currently just which LLM provider
+// AiService routes through. id is a normal PK (not a composite key) so the
+// tenant-scoping extension's plain `where: { key }` + injected
+// organizationId works without needing Prisma's compound-unique syntax.
 model AppSetting {
-  key   String @id
-  value String
+  id             String @id @default(cuid())
+  organizationId String
+  key            String
+  value          String
+
+  @@unique([organizationId, key])
 }
 
 // One row per AI call, written by AiService.complete() regardless of which
@@ -173,15 +228,18 @@ model AppSetting {
 // call failed before a response came back) — cost tracking is opt-in
 // visibility, not a hard requirement of the AI features themselves.
 model AiUsageLog {
-  id           String   @id @default(cuid())
-  provider     String
-  feature      String
-  success      Boolean
-  errorMessage String?
-  inputTokens  Int?
-  outputTokens Int?
-  latencyMs    Int
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  provider       String
+  feature        String
+  success        Boolean
+  errorMessage   String?
+  inputTokens    Int?
+  outputTokens   Int?
+  latencyMs      Int
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }
 
 // Named metric time-series snapshots the AI Monitoring Assistant answers
@@ -189,24 +247,43 @@ model AiUsageLog {
 // no live metrics ingest pipeline in the MVP (see docs/ARCHITECTURE.md's
 // integration hub for the target Datadog/Prometheus/CloudWatch connectors).
 model Metric {
-  id          String   @id @default(cuid())
-  name        String
-  rawData     String
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  rawData        String
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
-// Individual accounts. role gates write access (see RolesGuard): VIEWER can
-// read everything but not create/edit/delete/generate; ADMIN can do both.
-// The first account ever registered becomes ADMIN automatically (nothing
-// else could grant that role yet); every registration after that defaults
-// to VIEWER and needs an existing admin to promote it.
+// One organization per registration (see AuthService.register) — there's no
+// invite-a-teammate-into-my-org flow yet, so every account is currently the
+// sole member and founding ADMIN of its own organization. Intentionally
+// deferred; adding an invite-code join flow doesn't require another schema
+// migration.
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+}
+
+// Individual accounts, scoped to exactly one organization. role gates write
+// access within that org (see RolesGuard): VIEWER can read everything in
+// their org but not create/edit/delete/generate; ADMIN can do both, plus
+// manage other users in the same org. User and Organization are
+// deliberately NOT covered by the tenant-scoping extension — email lookup
+// during login must work across all orgs, and org-scoped user management
+// (the /users admin page) filters explicitly in UsersService instead.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         String   @default("VIEWER")
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String   @unique
+  passwordHash   String
+  name           String
+  role           String   @default("ADMIN")
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
 }

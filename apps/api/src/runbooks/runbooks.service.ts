@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Runbook, RunbookRun } from "@prisma/client";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { CreateRunbookDto } from "./dto/create-runbook.dto";
 import { UpdateStepResultDto } from "./dto/update-step-result.dto";
 import { RunbookStep, RunbookStepResult } from "./types";
@@ -15,11 +15,14 @@ function withParsedResults(run: RunbookRun) {
 
 @Injectable()
 export class RunbooksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: TenantPrismaService) {}
 
   async create(dto: CreateRunbookDto, userId: string) {
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
     const runbook = await this.prisma.runbook.create({
       data: {
+        organizationId: "",
         title: dto.title,
         description: dto.description,
         steps: JSON.stringify(dto.steps),
@@ -53,8 +56,10 @@ export class RunbooksService {
       order: s.order,
       completed: false,
     }));
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
     const run = await this.prisma.runbookRun.create({
-      data: { runbookId, stepResults: JSON.stringify(stepResults), createdById: userId },
+      data: { organizationId: "", runbookId, stepResults: JSON.stringify(stepResults), createdById: userId },
     });
     return withParsedResults(run);
   }

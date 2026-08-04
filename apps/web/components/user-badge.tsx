@@ -12,7 +12,9 @@ export default function UserBadge() {
         <span className={`dot ${user.role === "ADMIN" ? "dot-good" : "dot-muted"}`} />
         {user.role}
       </span>
-      <span>{user.name}</span>
+      <span>
+        {user.name} · {user.organization.name}
+      </span>
       <button
         type="button"
         className="btn btn-ghost"

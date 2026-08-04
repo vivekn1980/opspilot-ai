@@ -4,11 +4,13 @@ import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
 import { IS_PUBLIC_KEY } from "./public.decorator";
 import { AUTH_COOKIE_NAME } from "./constants";
+import { tenantContext } from "../prisma/tenant-context";
 
 interface JwtPayload {
   sub: string;
   email: string;
   name: string;
+  organizationId: string;
 }
 
 @Injectable()
@@ -33,8 +35,19 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(token);
-      // Normalized to { id, email, name } for controller consumers.
-      (request as any).user = { id: payload.sub, email: payload.email, name: payload.name };
+      // Normalized to { id, email, name, organizationId } for controller consumers.
+      (request as any).user = {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        organizationId: payload.organizationId,
+      };
+      // Sets the tenant context for the rest of this request's async
+      // continuation — enterWith (vs. .run(callback)) is what lets a guard,
+      // which returns a plain boolean rather than wrapping downstream
+      // execution, still propagate the context into the controller/service
+      // calls that happen after it.
+      tenantContext.enterWith({ organizationId: payload.organizationId });
       return true;
     } catch {
       throw new UnauthorizedException("Invalid or expired session");

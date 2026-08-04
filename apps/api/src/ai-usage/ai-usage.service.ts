@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiProvider } from "../settings/constants";
 
 export interface RecordUsageInput {
@@ -16,7 +16,7 @@ export interface RecordUsageInput {
 export class AiUsageService {
   private readonly logger = new Logger(AiUsageService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: TenantPrismaService) {}
 
   // Fire-and-forget: a logging failure must never break the AI call it's
   // trying to record. Same pattern as NotificationsService.notifyBestEffort.
@@ -24,6 +24,11 @@ export class AiUsageService {
     this.prisma.aiUsageLog
       .create({
         data: {
+          // Placeholder — TenantPrismaService's tenant-scoping extension
+          // overwrites this with the request's real organizationId before
+          // the query runs. TypeScript still requires it in the literal
+          // since the extension's injection is invisible to static types.
+          organizationId: "",
           provider: input.provider,
           feature: input.feature,
           success: input.success,

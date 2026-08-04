@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 import { CreateRiskDto } from "./dto/create-risk.dto";
 import { UpdateRiskDto } from "./dto/update-risk.dto";
@@ -7,12 +7,14 @@ import { UpdateRiskDto } from "./dto/update-risk.dto";
 @Injectable()
 export class RisksService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
   ) {}
 
   create(dto: CreateRiskDto, userId: string) {
-    return this.prisma.risk.create({ data: { ...dto, createdById: userId } });
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
+    return this.prisma.risk.create({ data: { organizationId: "", ...dto, createdById: userId } });
   }
 
   findAll() {

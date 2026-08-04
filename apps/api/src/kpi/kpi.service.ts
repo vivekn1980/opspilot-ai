@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { RESOLVED_STATUSES, SLA_TARGET_HOURS } from "./sla-targets";
 
 @Injectable()
 export class KpiService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: TenantPrismaService) {}
 
   async getSummary() {
     const incidents = await this.prisma.incident.findMany();

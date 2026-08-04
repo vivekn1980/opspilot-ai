@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 import { KpiService } from "../kpi/kpi.service";
 
 @Injectable()
 export class ServiceReviewReportsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
     private readonly kpiService: KpiService,
   ) {}
@@ -23,10 +23,11 @@ export class ServiceReviewReportsService {
     return report;
   }
 
-  // NOTE: the platform has no multi-tenant/account model yet, so this pulls
-  // from the same shared incident data as Executive Reports — accountName is
-  // a label for framing the report, not a real per-account filter. A true
-  // per-account MSP view needs tenant-scoped incidents (see docs/ARCHITECTURE.md).
+  // accountName is still just a label for framing the report, not a filter
+  // on which incidents get pulled in — that part of the platform has one
+  // tenant's incidents in scope (via TenantPrismaService), not per-MSP-
+  // customer sub-accounts within a tenant. That's a further level of
+  // scoping this migration didn't add.
   async generate(accountName: string, periodStart: string, periodEnd: string, userId: string) {
     const start = new Date(periodStart);
     const end = new Date(periodEnd);
@@ -48,8 +49,10 @@ export class ServiceReviewReportsService {
       incidents: incidents.map((i) => ({ title: i.title, severity: i.severity, status: i.status })),
     });
 
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
     return this.prisma.serviceReviewReport.create({
-      data: { accountName, content, periodStart: start, periodEnd: end, createdById: userId },
+      data: { organizationId: "", accountName, content, periodStart: start, periodEnd: end, createdById: userId },
     });
   }
 }

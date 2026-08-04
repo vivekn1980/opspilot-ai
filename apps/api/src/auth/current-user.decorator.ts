@@ -4,6 +4,7 @@ export interface CurrentUserPayload {
   id: string;
   email: string;
   name: string;
+  organizationId: string;
 }
 
 // Reads the user JwtAuthGuard attached to the request — only valid on

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { CreateIncidentDto } from "./dto/create-incident.dto";
 import { UpdateIncidentDto } from "./dto/update-incident.dto";
@@ -7,12 +7,16 @@ import { UpdateIncidentDto } from "./dto/update-incident.dto";
 @Injectable()
 export class IncidentsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly notifications: NotificationsService,
   ) {}
 
   async create(dto: CreateIncidentDto, userId: string) {
-    const incident = await this.prisma.incident.create({ data: { ...dto, createdById: userId } });
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
+    const incident = await this.prisma.incident.create({
+      data: { organizationId: "", ...dto, createdById: userId },
+    });
     if (incident.severity === "SEV1") {
       this.notifications.notifyBestEffort(`🚨 New SEV1 incident: "${incident.title}" (ID: ${incident.id})`);
     }

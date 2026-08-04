@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Doc } from "@prisma/client";
-import { PrismaService } from "../prisma/prisma.service";
+import { TenantPrismaService } from "../prisma/tenant-prisma.service";
 import { AiService } from "../ai/ai.service";
 import { CreateDocDto } from "./dto/create-doc.dto";
 
@@ -39,12 +39,14 @@ function retrieveRelevantDocs(question: string, docs: Doc[], limit: number): Doc
 @Injectable()
 export class DocsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: TenantPrismaService,
     private readonly aiService: AiService,
   ) {}
 
   create(dto: CreateDocDto, userId: string) {
-    return this.prisma.doc.create({ data: { ...dto, createdById: userId } });
+    // organizationId: "" is a placeholder overwritten by the tenant-scoping
+    // extension — see the comment in AiUsageService.recordBestEffort.
+    return this.prisma.doc.create({ data: { organizationId: "", ...dto, createdById: userId } });
   }
 
   findAll() {

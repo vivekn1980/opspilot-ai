@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 export default function RegisterPage() {
   const { refresh } = useAuth();
   const [name, setName] = useState("");
+  const [organizationName, setOrganizationName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -18,7 +19,7 @@ export default function RegisterPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await api.register({ name, email, password });
+      await api.register({ name, email, password, organizationName });
       await refresh();
     } catch (e: any) {
       setError(String(e.message ?? e));
@@ -31,10 +32,22 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="card auth-card">
         <h1 style={{ marginTop: 0 }}>Create an account</h1>
+        <p style={{ color: "var(--text-muted)", marginTop: 0, fontSize: "0.85rem" }}>
+          This creates a new, private workspace with you as its admin — not a login to an existing one.
+        </p>
         <form onSubmit={onSubmit}>
           <label>
             Name
             <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
+          </label>
+          <label>
+            Organization name
+            <input
+              required
+              value={organizationName}
+              onChange={(e) => setOrganizationName(e.target.value)}
+              placeholder="Acme Corp"
+            />
           </label>
           <label>
             Email
