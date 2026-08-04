@@ -22,6 +22,16 @@ export interface ManagedUser {
   createdAt: string;
 }
 
+export interface Invite {
+  id: string;
+  code: string;
+  createdById: string;
+  expiresAt: string;
+  usedAt: string | null;
+  usedByUserId: string | null;
+  createdAt: string;
+}
+
 export type AiProvider = "KIMI" | "ANTHROPIC";
 
 export interface AppSettings {

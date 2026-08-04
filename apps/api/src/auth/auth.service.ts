@@ -4,6 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { AcceptInviteDto } from "./dto/accept-invite.dto";
 
 const SALT_ROUNDS = 10;
 
@@ -33,9 +34,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // Every registration creates its own brand-new organization and becomes
-  // its founding (and, for now, only) ADMIN — there's no invite-a-teammate
-  // flow yet, so there's no existing org for a new account to join.
+  // Every direct registration creates its own brand-new organization and
+  // becomes its founding ADMIN. Joining an existing org instead goes
+  // through acceptInvite(), not this method.
   async register(dto: RegisterDto): Promise<AuthResult> {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) {
@@ -63,6 +64,42 @@ export class AuthService {
     }
     const organization = await this.prisma.organization.findUniqueOrThrow({
       where: { id: user.organizationId },
+    });
+    return this.buildAuthResult(user, organization);
+  }
+
+  // Joins the inviting admin's existing organization instead of creating a
+  // new one. Always VIEWER — an admin who wants to hand over more access
+  // promotes the new account afterward via /users, same as any other role
+  // change.
+  async acceptInvite(dto: AcceptInviteDto): Promise<AuthResult> {
+    const invite = await this.prisma.invite.findUnique({ where: { code: dto.code } });
+    if (!invite || invite.usedAt || invite.expiresAt < new Date()) {
+      throw new UnauthorizedException("This invite link is invalid, expired, or already used");
+    }
+
+    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (existing) {
+      throw new ConflictException("An account with this email already exists");
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        passwordHash,
+        name: dto.name,
+        role: "VIEWER",
+        organizationId: invite.organizationId,
+      },
+    });
+    await this.prisma.invite.update({
+      where: { id: invite.id },
+      data: { usedAt: new Date(), usedByUserId: user.id },
+    });
+
+    const organization = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: invite.organizationId },
     });
     return this.buildAuthResult(user, organization);
   }

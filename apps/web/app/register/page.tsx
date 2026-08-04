@@ -80,6 +80,9 @@ export default function RegisterPage() {
         <p className="auth-switch">
           Already have an account? <Link href="/login">Log in</Link>
         </p>
+        <p className="auth-switch">
+          Have an invite code? <Link href="/join">Join a team</Link>
+        </p>
       </div>
     </div>
   );

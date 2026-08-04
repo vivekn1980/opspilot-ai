@@ -5,6 +5,7 @@ import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
 import { RolesGuard } from "./auth/roles.guard";
 import { UsersModule } from "./users/users.module";
+import { InvitesModule } from "./invites/invites.module";
 import { IncidentsModule } from "./incidents/incidents.module";
 import { AiModule } from "./ai/ai.module";
 import { ProblemsModule } from "./problems/problems.module";
@@ -47,6 +48,7 @@ import { AiUsageModule } from "./ai-usage/ai-usage.module";
     SearchModule,
     AiUsageModule,
     UsersModule,
+    InvitesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

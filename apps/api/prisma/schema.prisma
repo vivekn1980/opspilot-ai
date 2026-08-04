@@ -258,11 +258,9 @@ model Metric {
   @@index([organizationId])
 }
 
-// One organization per registration (see AuthService.register) — there's no
-// invite-a-teammate-into-my-org flow yet, so every account is currently the
-// sole member and founding ADMIN of its own organization. Intentionally
-// deferred; adding an invite-code join flow doesn't require another schema
-// migration.
+// A direct registration always creates its own new organization (see
+// AuthService.register) — joining an existing one instead requires a valid
+// Invite (see below and AuthService.acceptInvite).
 model Organization {
   id        String   @id @default(cuid())
   name      String
@@ -284,6 +282,26 @@ model User {
   name           String
   role           String   @default("ADMIN")
   createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+}
+
+// Lets an existing admin bring a teammate into their org instead of the
+// teammate ending up with their own brand-new one. Redeeming an invite
+// (AuthService.acceptInvite) happens before the joining user has any
+// session or organization, so lookup by code must work without a tenant
+// context — same reasoning as User, this is deliberately NOT covered by
+// the tenant-scoping extension. usedAt/usedByUserId make each invite
+// single-use; expiresAt bounds how long a leaked/forwarded link stays valid.
+model Invite {
+  id             String    @id @default(cuid())
+  organizationId String
+  code           String    @unique
+  createdById    String
+  expiresAt      DateTime
+  usedAt         DateTime?
+  usedByUserId   String?
+  createdAt      DateTime  @default(now())
 
   @@index([organizationId])
 }

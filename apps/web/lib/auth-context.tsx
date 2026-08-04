@@ -14,7 +14,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export const PUBLIC_PATHS = ["/login", "/register"];
+export const PUBLIC_PATHS = ["/login", "/register", "/join"];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

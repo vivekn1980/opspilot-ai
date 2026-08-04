@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { Suspense, useState, FormEvent } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
-export default function LoginPage() {
+function JoinForm() {
   const { refresh } = useAuth();
+  const searchParams = useSearchParams();
+  const [code, setCode] = useState(searchParams.get("code") ?? "");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -17,7 +21,7 @@ export default function LoginPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await api.login({ email, password });
+      await api.acceptInvite({ code, name, email, password });
       await refresh();
     } catch (e: any) {
       setError(String(e.message ?? e));
@@ -29,8 +33,25 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="card auth-card">
-        <h1 style={{ marginTop: 0 }}>Log in</h1>
+        <h1 style={{ marginTop: 0 }}>Join a team</h1>
+        <p style={{ color: "var(--text-muted)", marginTop: 0, fontSize: "0.85rem" }}>
+          Using an invite link from a teammate adds you to their organization as a Viewer — an admin
+          there can promote you afterward.
+        </p>
         <form onSubmit={onSubmit}>
+          <label>
+            Invite code
+            <input
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Paste your invite code"
+            />
+          </label>
+          <label>
+            Name
+            <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
+          </label>
           <label>
             Email
             <input
@@ -46,24 +67,31 @@ export default function LoginPage() {
             <input
               type="password"
               required
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
             />
           </label>
           {error && <p className="error">{error}</p>}
           <div>
             <button className="btn" type="submit" disabled={submitting}>
-              {submitting ? "Logging in…" : "Log In"}
+              {submitting ? "Joining…" : "Join Team"}
             </button>
           </div>
         </form>
         <p className="auth-switch">
-          Don&apos;t have an account? <Link href="/register">Create one</Link>
-        </p>
-        <p className="auth-switch">
-          Have an invite code? <Link href="/join">Join a team</Link>
+          Don&apos;t have an invite? <Link href="/register">Create a new workspace</Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={<div className="auth-loading">Loading…</div>}>
+      <JoinForm />
+    </Suspense>
   );
 }

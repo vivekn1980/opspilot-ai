@@ -8,6 +8,7 @@ import {
   Doc,
   ExecutiveReport,
   Incident,
+  Invite,
   KpiSummary,
   AiUsageLogEntry,
   AiUsageSummary,
@@ -53,6 +54,8 @@ export const api = {
     request<{ user: User }>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
   login: (data: { email: string; password: string }) =>
     request<{ user: User }>("/auth/login", { method: "POST", body: JSON.stringify(data) }),
+  acceptInvite: (data: { code: string; email: string; password: string; name: string }) =>
+    request<{ user: User }>("/auth/accept-invite", { method: "POST", body: JSON.stringify(data) }),
   logout: () => request<{ ok: boolean }>("/auth/logout", { method: "POST" }),
   getCurrentUser: () => request<{ user: User }>("/auth/me"),
 
@@ -60,6 +63,11 @@ export const api = {
   listUsers: () => request<ManagedUser[]>("/users"),
   updateUserRole: (id: string, role: Role) =>
     request<ManagedUser>(`/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role }) }),
+
+  // Invites (admin only)
+  listInvites: () => request<Invite[]>("/invites"),
+  createInvite: () => request<Invite>("/invites", { method: "POST" }),
+  revokeInvite: (id: string) => request<{ ok: boolean }>(`/invites/${id}`, { method: "DELETE" }),
 
   // Incidents
   listIncidents: () => request<Incident[]>("/incidents"),

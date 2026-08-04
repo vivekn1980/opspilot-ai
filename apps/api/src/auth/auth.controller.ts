@@ -3,6 +3,7 @@ import { Response } from "express";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { AcceptInviteDto } from "./dto/accept-invite.dto";
 import { Public } from "./public.decorator";
 import { CurrentUser, CurrentUserPayload } from "./current-user.decorator";
 import { AUTH_COOKIE_MAX_AGE_MS, AUTH_COOKIE_NAME } from "./constants";
@@ -33,6 +34,15 @@ export class AuthController {
   @HttpCode(200)
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto);
+    setAuthCookie(res, result.token);
+    return { user: result.user };
+  }
+
+  @Public()
+  @Post("accept-invite")
+  @HttpCode(200)
+  async acceptInvite(@Body() dto: AcceptInviteDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.acceptInvite(dto);
     setAuthCookie(res, result.token);
     return { user: result.user };
   }
